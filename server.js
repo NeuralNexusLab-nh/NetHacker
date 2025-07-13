@@ -11,11 +11,8 @@ app.use(express.json());
 app.use(cookie());
 
 app.get('/', (req, res) => {
-  res.send('example text share website<br>try to GET "https://nethacker.onrender.com/submit/{ID_HERE}/{TEXT_HERE}" to submit<br>and GET https://nethacker.onrender.com/share/{ID_HERE} to view the text');
+  res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 };
-
-app.get('/submit/:id/:text', (req, res) => {
-});
 
 app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, 'favicon.png'));
@@ -29,5 +26,5 @@ app.all('*', (req, res) => {
 
 const port = process.env.PORT || 443;
 app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
+  console.log(`Server running at https://localhost:${port}`);
 });
