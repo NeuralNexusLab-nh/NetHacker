@@ -6,20 +6,32 @@ const fs = require('fs');
 const app = express();
 var views;
 var ips;
+const blockedIPs = [
+  "35.230.45.39",
+  "43.130.53.252",
+  "66.228.53.233",
+  "66.228.56.140",
+  "66.228.56.189",
+  "69.164.207.190"
+];
 
 app.set('trust proxy', true);
 app.use(express.json());
 app.use(cookie());
 app.use((req, res, next) => {
-  views = Number(fs.readFileSync('views.txt', 'utf8'));
-  ips = JSON.parse(fs.readFileSync('ips.json', 'utf8'));
-  views++;
-  ips.push(req.ip);
-  ips = JSON.stringify(ips);
-  views = views.toString();
-  fs.writeFileSync('views.txt', views);
-  fs.writeFileSync('ips.json', ips);
+  if (blockIps.includes(req.ip)) {
+    res.status(403).send("access denied");
+  } else {
+    views = Number(fs.readFileSync('views.txt', 'utf8'));
+    ips = JSON.parse(fs.readFileSync('ips.json', 'utf8'));
+    views++;
+    ips.push(req.ip);
+    ips = JSON.stringify(ips);
+    views = views.toString();
+    fs.writeFileSync('views.txt', views);
+    fs.writeFileSync('ips.json', ips);
   next();
+  }
 });
 
 app.get('/', (req, res) => {
