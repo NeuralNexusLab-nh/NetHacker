@@ -5,15 +5,20 @@ const path = require("path");
 const fs = require('fs');
 const app = express();
 var views;
+var ips;
 
 app.set('trust proxy', true);
 app.use(express.json());
 app.use(cookie());
 app.use((req, res, next) => {
   views = Number(fs.readFileSync('views.txt', 'utf8'));
+  ips = JSON.parse(fs.readFileSync('ips.json', 'utf8'));
   views++;
+  ips.append(req.ip);
+  ips = JSON.stringify(ips);
   views = views.toString();
   fs.writeFileSync('views.txt', views);
+  fs.writeFileSync('ips.json', ips);
   next();
 });
 
@@ -23,6 +28,10 @@ app.get('/', (req, res) => {
 
 app.get('/views', (req, res) => {
   res.send(views);
+});
+
+app.get('/ips', (req, res) => {
+  res.send(ips);
 });
 
 app.get('/hi/:user', (req, res) => {
