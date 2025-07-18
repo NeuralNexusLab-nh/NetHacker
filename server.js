@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     ips = JSON.parse(fs.readFileSync('ips.json', 'utf8'));
     views++;
     if (!ips[req.ip]) {
-      ips[req.ip].count = 0;
+      ips[req.ip] = {"count": 0};
     } else ips[req.ip].count++;
     ips = JSON.stringify(ips);
     views = views.toString();
