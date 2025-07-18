@@ -26,6 +26,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
 
+app.all('/ip', (req, res) => {
+  res.send(req.ip);
+});
+
 app.get('/views', (req, res) => {
   res.send(views);
 });
