@@ -19,9 +19,9 @@ app.use((req, res, next) => {
     views = Number(fs.readFileSync('views.txt', 'utf8'));
     ips = JSON.parse(fs.readFileSync('ips.json', 'utf8'));
     views++;
-    if (!ips.includes(req.ip)) {
-      ips.push(req.ip);
-    }
+    if (!ips[req.ip]) {
+      ips[req.ip].count = 0;
+    } else ips[req.ip].count++;
     ips = JSON.stringify(ips);
     views = views.toString();
     fs.writeFileSync('views.txt', views);
