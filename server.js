@@ -19,7 +19,7 @@ app.set('trust proxy', true);
 app.use(express.json());
 app.use(cookie());
 app.use((req, res, next) => {
-  if (blockIps.includes(req.ip)) {
+  if (blockedIps.includes(req.ip)) {
     res.status(403).send("access denied");
   } else {
     views = Number(fs.readFileSync('views.txt', 'utf8'));
