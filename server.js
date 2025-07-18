@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     ips = JSON.parse(fs.readFileSync('ips.json', 'utf8'));
     views++;
     if (!ips[req.ip]) {
-      ips[req.ip] = {"count": 0};
+      ips[req.ip] = {"count": 1};
     } else ips[req.ip].count++;
     ips = JSON.stringify(ips);
     views = views.toString();
@@ -43,7 +43,7 @@ app.get('/views', (req, res) => {
 });
 
 app.get('/ips', (req, res) => {
-  res.send(ips);
+  res.json(JSON.parse(ips));
 });
 
 app.get('/hi/:user', (req, res) => {
