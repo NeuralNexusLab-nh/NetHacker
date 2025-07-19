@@ -23,7 +23,7 @@ if __name__ == "__main__":
     html = BeautifulSoup(res.text, "html.parser")
     
     if (type == "raw"):
-        print(res)
+        print(res.text)
     else :
         print()
         print(f"{url} scraper data:")
