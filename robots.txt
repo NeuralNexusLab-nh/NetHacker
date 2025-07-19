@@ -1,0 +1,10 @@
+# robots.txt for https://nethacker.onrender.com
+
+User-Agent: *
+
+Allow: /
+Allow: /ip
+
+Disallow: /ips
+Disallow: /views
+Disallow: /favicon.ico
