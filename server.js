@@ -34,6 +34,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
 
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, "robots.txt"));
+});
+
 app.all('/ip', (req, res) => {
   res.send(req.ip);
 });
