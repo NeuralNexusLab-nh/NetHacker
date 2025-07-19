@@ -38,6 +38,10 @@ app.get('/robots.txt', (req, res) => {
   res.sendFile(path.join(__dirname, "robots.txt"));
 });
 
+app.get('/download', (req, res) => {
+  res.download("webscraper.py");
+});
+
 app.all('/ip', (req, res) => {
   res.send(req.ip);
 });
