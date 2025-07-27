@@ -39,7 +39,7 @@ app.get('/robots.txt', (req, res) => {
 });
 
 app.get('/download', (req, res) => {
-  res.download("webscraper.py");
+  res.download("bot.py");
 });
 
 app.all('/ip', (req, res) => {
