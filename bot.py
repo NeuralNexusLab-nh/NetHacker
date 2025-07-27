@@ -52,7 +52,7 @@ def bot (link):
             print("Content-Security-Policy: True")
         else:
             print("Content-Security-Policy: False")
-        if "X-Frame-Option" in dictHeaders or "x-frame-option" in dictHeaders:
+        if "X-Frame-Option" in dictHeaders or "x-frame-option" in dictHeaders or "X-Frame-Options" in dictHeaders or "x-frame-options" in dictHeaders:
             print("X-Frame-Option: True")
         else:
             print("X-Frame-Option: False")
