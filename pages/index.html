@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NetHacker</title>
+    <style>
+      /* ====== Reset & Base ====== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #000;
+    color: #00ff00;
+    font-family: 'Courier New', Courier, monospace;
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  /* ====== Links ====== */
+  a {
+    color: #00ff00;
+    text-decoration: none;
+    position: relative;
+  }
+
+  a::after {
+    content: '_';
+    animation: blink 1s infinite;
+    position: absolute;
+    right: -10px;
+  }
+
+  /* ====== Inputs & Textarea ====== */
+  input, textarea {
+    background-color: #000;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    padding: 10px;
+    width: 100%;
+    font-size: 1rem;
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 10px #00ff00;
+  }
+
+  /* ====== Buttons ====== */
+  button {
+    background-color: #000;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    padding: 10px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.4s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animation on hover */
+  button:hover {
+    transform: rotate(360deg);
+    box-shadow: 0 0 20px #00ff00;
+  }
+
+  /* Pause animation on click (spin + glow stop) */
+  button:active {
+    animation-play-state: paused;
+    box-shadow: 0 0 10px #00ff00 inset;
+  }
+
+  /* ====== Headings ====== */
+  h1, h2, h3, p {
+    color: #00ff00;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 5px #00ff00;
+  }
+
+  /* ====== Code Blocks ====== */
+  code, pre {
+    background-color: #111;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    padding: 10px;
+    display: block;
+    overflow-x: auto;
+  }
+
+  /* ====== Terminal-style Box ====== */
+  .terminal-box {
+    background-color: #111;
+    border: 1px solid #00ff00;
+    padding: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 20px 0;
+    box-shadow: 0 0 20px #00ff00;
+    animation: flicker 2s infinite alternate;
+  }
+
+  /* ====== Animations ====== */
+  @keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
+  }
+
+  @keyframes flicker {
+    0% { opacity: 1; box-shadow: 0 0 20px #00ff00; }
+    100% { opacity: 0.8; box-shadow: 0 0 5px #00ff00; }
+  }
+    </style>
+  </head>
+  <body>
+    <h1>NetHacker</h1>
+    <br><br>
+    <h3>The Best Dynamic Website Builder and Penetration Test Technician</h3>
+    <br><br>
+    <a href="/hi/user">say hi to us</a>
+    <br><br>
+    <p>use our CLI web scraper:</p><br>
+    <a href="/bot.py">bot.py</a>
+    <code>[bash]<br>python3 bot.py -u http://nethacker.cloud</code>
+    <br><br>
+    <a href="https://nethacker.onrender.com/download">download our web scraper</a>
+    <br><br>
+    <p>Our Content Way:</p>
+    <br>
+    <a href="https://scratch.mit.edu/users/chatRBT/" target="_blank">Scratch</a><br>
+    <a href="https://github.com/NeuralNexusLab-nh/" target="_blank">Github</a><br>
+    <a href="https://www.youtube.com/@NeuralNexusLab-chatIFT" target="_blank">Youtube</a><br>
+    <a href="https://www.instagram.com/NeuralNexusLab" target="_blank">Instagram</a><br><br>
+    <p>email:</p>
+    <a href="mailto:mail@nethacker.cloud">mail@nethacker.cloud (neuralnexuslab@hotmail.com)</a>
+  </body>
+</html>
