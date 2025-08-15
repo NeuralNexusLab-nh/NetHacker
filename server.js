@@ -1,0 +1,55 @@
+const express = require("express");
+const cookie = require("cookie-parser");
+const bcrypt = require("bcrypt");
+const crypto = require('crypto');
+const app = express();
+
+//parameters
+const salt = process.env.SALT;
+const key = process.env.KEY;
+
+//functions
+function encrypt(text) {
+  const cipher = crypto.createCipheriv("aes-256-ecb", key, null);
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return encrypted;
+}
+
+function decrypt(encrypted) {
+  const decipher = crypto.createDecipheriv("aes-256-ecb", key, null);
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+function pass (ua, ip, id) {
+  let pass = "";
+  pass += encrypt(ua);
+  pass += encrypt(ip);
+  pass += encrypt(id);
+  return pass;
+}
+
+app.use(cookie());
+app.use(express.json());
+app.set("trust proxy", true);
+
+app.use((req, res, next) => {
+  if (!req.cookies.id) {
+    const id = crypto.randomBytes(16).toString("hex");
+    res.cookie("id", id, {
+      maxAge: 10000 * 60 * 60 * 24 * 365 * 10,
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax"
+    })};
+  if (!req.cookies.pass) {
+      res.cookie("pass", pass(req.headers["user-agent"], req.ip, id), {
+      maxAge: 10000 * 60 * 60 * 24 * 365 * 10,
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax"
+    });
+});
+
