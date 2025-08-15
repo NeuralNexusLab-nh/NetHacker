@@ -2,6 +2,7 @@ const express = require("express");
 const cookie = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const crypto = require('crypto');
+const fs = require("fs");
 const app = express();
 
 //parameters
@@ -53,3 +54,11 @@ app.use((req, res, next) => {
     });
 });
 
+app.get("/", (req, res) => {
+  res.sendFile("/pages/index.html");
+});
+
+app.post("/submit", (req, res) => {
+  
+
+app.listen(process.env.PORT, () => { console.log(`Server running at http://localhost:${process.env.PORT}.`) });
