@@ -65,7 +65,7 @@ app.use((req, res, next) => {
   } else {
       res.sendFile("/error/403.html");
     }
-});
+}});
 
 app.use((req, res, next) => {
   if (req.cookies.pass !== pass(req.headers["user-agent"], req.ip, req.cookies.id) {
