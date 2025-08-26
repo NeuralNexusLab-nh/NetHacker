@@ -1,14 +1,13 @@
 function create (func) {
-  var content = document.createElement("div");
-  content.className = "captcha-div";
-
-  var text = document.createElement("p");
-  text.className = "captcha-p";
-  text.textContent("input the number to verify");
-
-  var input = document.createElement("input");
-  input.className = "captcha-input";
-  input.type = "number";
-  input.placeholder = "number here";
+  var box = document.createElement("div");
+  box.className = "captcha-box";
+  box.id = "captcha";
+  document.body.appendChild(box);
+  
+  document.getElementById("captcha").innerHTML += '<p class="captcha-p">NetHacker CAPTCHA</p>';
+  random = Math.floor(Math.random() * 9999);
+  document.getElementById("captcha").innerHTML += `<p style="user-select: none; color=blue" id="noCopy">${random}</p>`;
+  document.getElementById("captcha").innerHTML += '<br><input style="" id="captchaInput" placeholder="input number">'
+  document.getElementById("captcha").innerHTML += '<button id="captchaBtn">
 
   
