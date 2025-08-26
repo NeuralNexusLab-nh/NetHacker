@@ -96,10 +96,6 @@ app.get("/donation", (req, res) => {
   res.sendFile("/pages/donation.html");
 });
 
-app.get("/service", (req, res) => {
-  res.sendFile("/pages/service.html");
-});
-
 app.get("/robots.txt", (req, res) => {
   res.sendFile("/pages/robots.txt");
 });
