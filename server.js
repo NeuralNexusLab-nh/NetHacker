@@ -78,6 +78,16 @@ app.get("/", (req, res) => {
   res.sendFile("/pages/index.html");
 });
 
+app.post("/encrytion", (req, res) => {
+  text = req.params.text;
+  type = req.params.type;
+  if (type == "decrypt") {
+    res.send(decrypt(text));
+  } else {
+    res.send(encrypt(text));
+  }
+});
+
 app.get("/style.css", (req, res) => {
   res.sendFile("/style.css");
 });
