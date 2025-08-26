@@ -82,11 +82,21 @@ app.get("/style.css", (req, res) => {
   res.sendFile("/style.css");
 });
 
-app.post("/submit/", (req, res) => {
-  let forms = fs.readFileSync("data.json");
-  forms = decrypt(forms);
-  forms = JSON.parse(forms);
-  forms.push({"type": req.body.type, "email
+app.get("/donation", (req, res) => {
+  res.sendFile("/pages/donation.html");
+});
+
+app.get("/service", (req, res) => {
+  res.sendFile("/pages/service.html");
+});
+
+app.get("/robots.txt", (req, res) => {
+  res.sendFile("/pages/robots.txt");
+});
+
+app.get("*", (req, res) => {
+  res.sendFile("/error/404.html");
+});
 
 
 app.listen(process.env.PORT, () => { console.log(`Server running at http://localhost:${process.env.PORT}.`) });
