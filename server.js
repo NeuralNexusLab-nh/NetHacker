@@ -9,6 +9,8 @@ const app = express();
 const salt = process.env.SALT;
 const key = process.env.KEY;
 const user_agent = ["Firefox", "Chrome", "Edg", "Safari", "OPR", "CriOS", "FxiOS"]
+const secret = process.env.SECRET;
+
 //functions
 function encrypt(text) {
   const cipher = crypto.createCipheriv("aes-256-ecb", key, null);
@@ -80,7 +82,11 @@ app.get("/style.css", (req, res) => {
   res.sendFile("/style.css");
 });
 
-
+app.post("/submit/", (req, res) => {
+  let forms = fs.readFileSync("data.json");
+  forms = decrypt(forms);
+  forms = JSON.parse(forms);
+  forms.push({"type": req.body.type, "email
 
 
 app.listen(process.env.PORT, () => { console.log(`Server running at http://localhost:${process.env.PORT}.`) });
