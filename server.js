@@ -5,7 +5,7 @@ const path = require("path");
 const app = express();
 
 // User agents to allow
-const user_agent = ["Firefox", "Chrome", "Edg", "Safari", "OPR", "CriOS", "FxiOS"];
+const user_agent = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
 
 // AES encryption (fixed server key and IV)
 const AES_SECRET_KEY = crypto.randomBytes(32); // server-side fixed key
