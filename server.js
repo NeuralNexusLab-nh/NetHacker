@@ -41,7 +41,8 @@ app.set("trust proxy", true);
 app.use((req, res, next) => {
   var isAllowUa = false;
   for (let i = 0; i < user_agent.length; i++) {
-    if (req.headers["user-agent"].include(user_agent[i])) {
+    const ua = req.headers["user-agent"]
+    if (ua.include(user_agent[i])) {
       isAllowUa = true;
     }
   }
