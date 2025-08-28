@@ -6,23 +6,35 @@ const fs = require("fs");
 const app = express();
 
 //parameters
-const salt = process.env.SALT;
-const key = Buffer.from(process.env.KEY, "utf8");
 const user_agent = ["Firefox", "Chrome", "Edg", "Safari", "OPR", "CriOS", "FxiOS"]
-const secret = process.env.SECRET;
-console.log("key: " + key);
+
 //functions
 function encrypt(text) {
-  const cipher = crypto.createCipheriv("aes-256-ecb", key, null);
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return encrypted;
+  const key = crypto.randomBytes(32);
+  const iv = crypto.randomBytes(16);
+
+  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+  let encrypted = cipher.update(text, "utf8", "hex");
+  encrypted += cipher.final("hex");
+
+  const payload = {
+    encrypted,
+    key: key.toString("hex"),
+    iv: iv.toString("hex")
+  };
+
+  return JSON.stringify(payload);
 }
 
-function decrypt(encrypted) {
-  const decipher = crypto.createDecipheriv("aes-256-ecb", key, null);
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
+function decrypt(payloadStr) {
+  const payload = JSON.parse(payloadStr);
+  const key = Buffer.from(payload.key, "hex");
+  const iv = Buffer.from(payload.iv, "hex");
+
+  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+  let decrypted = decipher.update(payload.encrypted, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+
   return decrypted;
 }
 
