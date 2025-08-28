@@ -1,104 +1,101 @@
 const express = require("express");
 const cookie = require("cookie-parser");
-const bcrypt = require("bcrypt");
-const crypto = require('crypto');
-const fs = require("fs");
+const crypto = require("crypto");
 const path = require("path");
 const app = express();
 
-//parameters
-const user_agent = ["Firefox", "Chrome", "Edg", "Safari", "OPR", "CriOS", "FxiOS"]
+// User agents to allow
+const user_agent = ["Firefox", "Chrome", "Edg", "Safari", "OPR", "CriOS", "FxiOS"];
 
-//functions
+// AES encryption (fixed server key and IV)
+const AES_SECRET_KEY = crypto.randomBytes(32); // server-side fixed key
+const AES_IV = crypto.randomBytes(16);         // server-side fixed IV
+
 function encrypt(text) {
-  const key = crypto.randomBytes(32);
-  const iv = crypto.randomBytes(16);
-
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+  const cipher = crypto.createCipheriv("aes-256-cbc", AES_SECRET_KEY, AES_IV);
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
-
-  const payload = {
-    encrypted,
-    key: key.toString("hex"),
-    iv: iv.toString("hex")
-  };
-
-  return JSON.stringify(payload);
+  return encrypted;
 }
 
-function decrypt(payloadStr) {
-  const payload = JSON.parse(payloadStr);
-  const key = Buffer.from(payload.key, "hex");
-  const iv = Buffer.from(payload.iv, "hex");
-
-  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-  let decrypted = decipher.update(payload.encrypted, "hex", "utf8");
+function decrypt(encrypted) {
+  const decipher = crypto.createDecipheriv("aes-256-cbc", AES_SECRET_KEY, AES_IV);
+  let decrypted = decipher.update(encrypted, "hex", "utf8");
   decrypted += decipher.final("utf8");
-
   return decrypted;
 }
 
-function pass (ua, ip, id) {
-  let pass = "";
-  pass += encrypt(ua);
-  pass += encrypt(ip);
-  pass += encrypt(id);
-  return pass;
+// Create hash for UA/IP/ID verification
+function pass(ua, ip, id) {
+  const hash = crypto.createHash("sha256");
+  hash.update(`${ua}|${ip}|${id}`);
+  return hash.digest("hex");
 }
 
+// Middleware
 app.use(cookie());
 app.use(express.json());
 app.set("trust proxy", true);
 
+// UA check + cookie setup
 app.use((req, res, next) => {
-  const id = crypto.randomBytes(16).toString("hex");
-  var isAllowUa = false;
-  for (let i = 0; i < user_agent.length; i++) {
-    const ua = req.headers["user-agent"]
-    if (ua.includes(user_agent[i])) {
-      isAllowUa = true;
-    }
-  }
-  if (isAllowUa) {
-      if (!req.cookies.id) {
-        res.cookie("id", id, {
-          maxAge: 10000 * 60 * 60 * 24 * 365 * 10,
-          httpOnly: true,
-          secure: true,
-          sameSite: "lax"
-        })};
-    if (!req.cookies.pass) {
-        res.cookie("pass", pass(req.headers["user-agent"], req.ip, id), {
-        maxAge: 10000 * 60 * 60 * 24 * 365 * 10,
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax"
-      });
-      next();
-  } else {
-      res.sendFile("/error/403.html");
-    }
-}});
+  const ua = req.headers["user-agent"];
+  const isAllowUa = user_agent.some(u => ua.includes(u));
 
-app.use((req, res, next) => {
-  if (req.cookies.pass !== pass(req.headers["user-agent"], req.ip, req.cookies.id)) {
-    res.sendFile(path.join(__dirname, "error", "403.html"));
+  if (!isAllowUa) return res.sendFile(path.join(__dirname, "error", "403.html"));
+
+  const id = req.cookies.id || crypto.randomBytes(16).toString("hex");
+  if (!req.cookies.id) {
+    res.cookie("id", id, {
+      maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax"
+    });
   }
+
+  const passHash = pass(ua, req.ip, id);
+  if (!req.cookies.pass) {
+    res.cookie("pass", passHash, {
+      maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax"
+    });
+  }
+
+  next();
 });
 
-      
+// Verify pass cookie
+app.use((req, res, next) => {
+  const ua = req.headers["user-agent"];
+  if (req.cookies.pass !== pass(ua, req.ip, req.cookies.id)) {
+    return res.sendFile(path.join(__dirname, "error", "403.html"));
+  }
+  next();
+});
+
+// Routes
 app.get("/", (req, res) => {
-  res.sendFile("/pages/index.html");
+  res.sendFile(path.join(__dirname, "pages", "index.html"));
 });
 
 app.post("/encrytion", (req, res) => {
-  text = req.params.text;
-  type = req.params.type;
-  if (type == "decrypt") {
-    res.send(decrypt(text));
-  } else {
-    res.send(encrypt(text));
+  const { text, type } = req.body;
+
+  if (!text || !type) return res.status(400).send({ error: "Missing text or type" });
+
+  try {
+    if (type === "decrypt") {
+      const decrypted = decrypt(text);
+      res.send({ result: decrypted });
+    } else {
+      const encrypted = encrypt(text);
+      res.send({ result: encrypted });
+    }
+  } catch (err) {
+    res.status(500).send({ error: "Encryption/Decryption failed", message: err.message });
   }
 });
 
@@ -118,5 +115,8 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "error", "404.html"));
 });
 
-
-app.listen(process.env.PORT, () => { console.log(`Server running at http://localhost:${process.env.PORT}.`) });
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
