@@ -42,7 +42,7 @@ app.use((req, res, next) => {
   var isAllowUa = false;
   for (let i = 0; i < user_agent.length; i++) {
     const ua = req.headers["user-agent"]
-    if (ua.include(user_agent[i])) {
+    if (ua.includes(user_agent[i])) {
       isAllowUa = true;
     }
   }
