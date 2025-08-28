@@ -42,7 +42,7 @@ app.use((req, res, next) => {
   const ua = req.headers["user-agent"];
   const isAllowUa = user_agent.some(u => ua.includes(u));
 
-  if (!isAllowUa) return res.sendFile(path.join(__dirname, "error", "403.html"));
+  if (!isAllowUa) return res.sendFile(path.join(__dirname, "error", "inspector.html"));
 
   const id = req.cookies.id || crypto.randomBytes(16).toString("hex");
   if (!req.cookies.id) {
@@ -71,7 +71,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   const ua = req.headers["user-agent"];
   if (req.cookies.pass !== pass(ua, req.ip, req.cookies.id)) {
-    return res.sendFile(path.join(__dirname, "error", "403.html"));
+    return res.sendFile(path.join(__dirname, "error", "inspector.html"));
   }
   next();
 });
