@@ -7,14 +7,15 @@ const app = express();
 //params
 const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
 const salt = process.env.SALT;
-var viewpass = "";
 
 //function
 function pass (ua, id, ip) {
+  let viewpass = ""
   txt = ua + id + ip;
   bcrypt.hash(txt, salt, (err, hashed) => {
     viewpass = hashed;
   });
+  return viewpass;
 }
 
 // Middleware
@@ -36,8 +37,7 @@ app.use((req, res, next) => {
     var id = req.cookies.id;
   }
   if (!req.cookies.pass) {
-    pass(req.headers["user-agent"], id, req.ip);
-    res.cookie("pass", viewpass, {
+    res.cookie("pass", pass(req.headers["user-agent"], id, req.ip), {
       maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
       httpOnly: true,
       secure: true,
@@ -49,8 +49,7 @@ app.use((req, res, next) => {
 //check pass && ua
 app.use(cookie());
 app.use((req, res, next) => {
-  pass(req.headers["user-agent"], req.cookies.id, req.ip);
-  if (req.cookies.pass == viewpass) {
+  if (req.cookies.pass == pass(req.headers["user-agent"], id, req.ip)) {
     for (let i = 0; i < ua.length; i++) {
       if (req.headers["user-agent"].includes(ua[i])) {
         next();
