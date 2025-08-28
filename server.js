@@ -5,7 +5,7 @@ const path = require("path");
 const app = express();
 
 //params
-const user_agent = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
+const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
 const salt = process.env.SALT;
 var viewpass = "";
 
@@ -55,11 +55,11 @@ app.use((req, res, next) => {
       if (req.headers["user-agent"].includes(ua[i])) {
         next();
       } else {
-        res.sendFile("/error/inspector.html");
+        res.sendFile(path.join(__dirname, "error", "inspector.html"));
       }
     }
   } else {
-    res.sendFile("/error/inspector.html");
+    res.sendFile(path.join(__dirname, "error", "inspector.html"));
   }
 });
 
