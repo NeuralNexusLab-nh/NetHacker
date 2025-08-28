@@ -1,51 +1,30 @@
 const express = require("express");
 const cookie = require("cookie-parser");
-const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const path = require("path");
 const app = express();
 
-// User agents to allow
+//params
 const user_agent = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
+const salt = process.env.SALT;
+var viewpass = "";
 
-// AES encryption (fixed server key and IV)
-const AES_SECRET_KEY = crypto.randomBytes(32); // server-side fixed key
-const AES_IV = crypto.randomBytes(16);         // server-side fixed IV
-
-function encrypt(text) {
-  const cipher = crypto.createCipheriv("aes-256-cbc", AES_SECRET_KEY, AES_IV);
-  let encrypted = cipher.update(text, "utf8", "hex");
-  encrypted += cipher.final("hex");
-  return encrypted;
-}
-
-function decrypt(encrypted) {
-  const decipher = crypto.createDecipheriv("aes-256-cbc", AES_SECRET_KEY, AES_IV);
-  let decrypted = decipher.update(encrypted, "hex", "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
-}
-
-// Create hash for UA/IP/ID verification
-function pass(ua, ip, id) {
-  const hash = crypto.createHash("sha256");
-  hash.update(`${ua}|${ip}|${id}`);
-  return hash.digest("hex");
+//function
+function pass (ua, id, ip) {
+  txt = ua + id + ip;
+  bcrypt.hash(txt, salt, (err, hashed) => {
+    viewpass = hashed;
+  });
 }
 
 // Middleware
 app.use(cookie());
 app.use(express.json());
 app.set("trust proxy", true);
-
-// UA check + cookie setup
+//pass && id setup
 app.use((req, res, next) => {
-  const ua = req.headers["user-agent"];
-  const isAllowUa = user_agent.some(u => ua.includes(u));
-
-  if (!isAllowUa) return res.sendFile(path.join(__dirname, "error", "inspector.html"));
-
-  const id = req.cookies.id || crypto.randomBytes(16).toString("hex");
   if (!req.cookies.id) {
+    var id = Math.floor(Math.random() * 9999999999999999999);
     res.cookie("id", id, {
       maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
       httpOnly: true,
@@ -53,28 +32,36 @@ app.use((req, res, next) => {
       sameSite: "lax"
     });
   }
-
-  const passHash = pass(ua, req.ip, id);
+  if (!id) {
+    var id = req.cookies.id;
+  }
   if (!req.cookies.pass) {
-    res.cookie("pass", passHash, {
+    pass(req.headers["user-agent"], id, req.ip);
+    res.cookie("pass", viewpass, {
       maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
       httpOnly: true,
       secure: true,
       sameSite: "lax"
     });
   }
-
   next();
 });
-
-// Verify pass cookie
+//check pass && ua
+app.use(cookie());
 app.use((req, res, next) => {
-  const ua = req.headers["user-agent"];
-  if (req.cookies.pass !== pass(ua, req.ip, req.cookies.id)) {
-    return res.sendFile(path.join(__dirname, "error", "inspector.html"));
+  pass(req.headers["user-agent"], req.cookies.id, req.ip);
+  if (req.cookies.pass == viewpass) {
+    for (let i = 0; i < ua.length; i++) {
+      if (req.headers["user-agent"].includes(ua[i])) {
+        next();
+      } else {
+        res.sendFile("/error/inspector.html");
+      }
+  } else {
+    res.sendFile("/error/inspector.html");
   }
-  next();
 });
+
 
 // Routes
 app.get("/", (req, res) => {
