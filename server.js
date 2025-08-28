@@ -57,6 +57,7 @@ app.use((req, res, next) => {
       } else {
         res.sendFile("/error/inspector.html");
       }
+    }
   } else {
     res.sendFile("/error/inspector.html");
   }
