@@ -39,6 +39,7 @@ app.use(express.json());
 app.set("trust proxy", true);
 
 app.use((req, res, next) => {
+  const id = crypto.randomBytes(16).toString("hex");
   var isAllowUa = false;
   for (let i = 0; i < user_agent.length; i++) {
     const ua = req.headers["user-agent"]
@@ -48,7 +49,6 @@ app.use((req, res, next) => {
   }
   if (isAllowUa) {
       if (!req.cookies.id) {
-        const id = crypto.randomBytes(16).toString("hex");
         res.cookie("id", id, {
           maxAge: 10000 * 60 * 60 * 24 * 365 * 10,
           httpOnly: true,
