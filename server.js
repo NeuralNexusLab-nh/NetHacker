@@ -10,7 +10,7 @@ const salt = process.env.SALT;
 const key = Buffer.from(process.env.KEY, "utf8");
 const user_agent = ["Firefox", "Chrome", "Edg", "Safari", "OPR", "CriOS", "FxiOS"]
 const secret = process.env.SECRET;
-
+console.log("key: " + key);
 //functions
 function encrypt(text) {
   const cipher = crypto.createCipheriv("aes-256-ecb", key, null);
