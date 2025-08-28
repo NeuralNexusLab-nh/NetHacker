@@ -82,7 +82,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   if (req.cookies.pass !== pass(req.headers["user-agent"], req.ip, req.cookies.id)) {
-    res.sendFile("/error/403.html")
+    res.sendFile(path.join(__dirname, "error", "403.html"));
   }
 });
 
@@ -102,19 +102,19 @@ app.post("/encrytion", (req, res) => {
 });
 
 app.get("/style.css", (req, res) => {
-  res.sendFile("/style.css");
+  res.sendFile(path.join(__dirname, "style.css"));
 });
 
 app.get("/donation", (req, res) => {
-  res.sendFile("/pages/donation.html");
+  res.sendFile(path.join(__dirname, "pages", "donation.html"));
 });
 
 app.get("/robots.txt", (req, res) => {
-  res.sendFile("/pages/robots.txt");
+  res.sendFile(path.join(__dirname, "pages", "robots.txt"));
 });
 
 app.get("*", (req, res) => {
-  res.sendFile("/error/404.html");
+  res.sendFile(path.join(__dirname, "error", "404.html"));
 });
 
 
