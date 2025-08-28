@@ -7,7 +7,7 @@ const app = express();
 
 //parameters
 const salt = process.env.SALT;
-const key = process.env.KEY;
+const key = Buffer.from(process.env.KEY, "utf8");
 const user_agent = ["Firefox", "Chrome", "Edg", "Safari", "OPR", "CriOS", "FxiOS"]
 const secret = process.env.SECRET;
 
