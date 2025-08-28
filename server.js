@@ -107,6 +107,10 @@ app.get("/donation", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "donation.html"));
 });
 
+app.get("payment", (req, res) => {
+  res.sendFile(path.join(__dirname, "pages", "payment.html"));
+});
+
 app.get("/robots.txt", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "robots.txt"));
 });
