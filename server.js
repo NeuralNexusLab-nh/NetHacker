@@ -3,6 +3,7 @@ const cookie = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const crypto = require('crypto');
 const fs = require("fs");
+const path = require("path");
 const app = express();
 
 //parameters
