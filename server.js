@@ -6,59 +6,22 @@ const app = express();
 
 //params
 const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
-const salt = process.env.SALT;
-
-//function
-function pass (ua, id, ip) {
-  let viewpass = ""
-  txt = ua + id + ip;
-  bcrypt.hash(txt, salt, (err, hashed) => {
-    viewpass = hashed;
-  });
-  return viewpass;
-}
-
+const key = process.env.KEY;
 // Middleware
 app.use(cookie());
 app.use(express.json());
 app.set("trust proxy", true);
-//pass && id setup
 app.use((req, res, next) => {
-  if (!req.cookies.id) {
-    var id = Math.floor(Math.random() * 9999999999999999999);
-    res.cookie("id", id, {
-      maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax"
-    });
-  }
-  if (!id) {
-    var id = req.cookies.id;
-  }
-  if (!req.cookies.pass) {
-    res.cookie("pass", pass(req.headers["user-agent"], id, req.ip), {
-      maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax"
-    });
-  }
-  next();
-});
-//check pass && ua
-app.use(cookie());
-app.use((req, res, next) => {
-  if (req.cookies.pass == pass(req.headers["user-agent"], id, req.ip)) {
-    for (let i = 0; i < ua.length; i++) {
-      if (req.headers["user-agent"].includes(ua[i])) {
-        next();
-      } else {
-        res.sendFile(path.join(__dirname, "error", "inspector.html"));
-      }
+  var isUa = false;
+  for (let i = 0; i < ua.length; i++) {
+    if (req.headers["user-agent"].includes(ua[i])) {
+      isUa = true;
     }
+  }
+  if (isUa) {
+    next();
   } else {
-    res.sendFile(path.join(__dirname, "error", "inspector.html"));
+    res.sendFile(path.join(__dirname, "error", "403.html"));
   }
 });
 
@@ -66,24 +29,6 @@ app.use((req, res, next) => {
 // Routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "index.html"));
-});
-
-app.post("/encrytion", (req, res) => {
-  const { text, type } = req.body;
-
-  if (!text || !type) return res.status(400).send({ error: "Missing text or type" });
-
-  try {
-    if (type === "decrypt") {
-      const decrypted = decrypt(text);
-      res.send({ result: decrypted });
-    } else {
-      const encrypted = encrypt(text);
-      res.send({ result: encrypted });
-    }
-  } catch (err) {
-    res.status(500).send({ error: "Encryption/Decryption failed", message: err.message });
-  }
 });
 
 app.get("/style.css", (req, res) => {
