@@ -48,7 +48,8 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy": "frame-ancestors 'self';");
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
+  next();
 });
          
 // Routes
