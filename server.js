@@ -41,7 +41,7 @@ app.use(cookie());
 
 app.use((req, res, next) => {
   var journal = JSON.parse(fs.readFileSync("journal.json"));
-  journal.append({"time": new Date(), "id": req.cookies.id, "user-agent": req.headers["user-agent"], "ip": req.ip, "path": req.path});
+  journal.push({"time": new Date(), "id": req.cookies.id, "user-agent": req.headers["user-agent"], "ip": req.ip, "path": req.path});
   journal = JSON.stringify(journal);
   fs.writeFile("journal.json", journal, (err) => {});
   next();
