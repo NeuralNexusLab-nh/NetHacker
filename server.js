@@ -56,6 +56,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "index.html"));
 });
 
+app.get("/healthz", (req, res) => {
+  res.send("true");
+});
+
 app.get("/journal/:key", (req, res) => {
   if (req.params.key == key) {
     res.sendFile(path.join(__dirname, "journal.json"));
