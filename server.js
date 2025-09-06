@@ -46,6 +46,10 @@ app.use((req, res, next) => {
   fs.writeFile("journal.json", journal, (err) => {});
   next();
 });
+
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy": "frame-ancestors 'self';");
+});
          
 // Routes
 app.get("/", (req, res) => {
@@ -64,12 +68,8 @@ app.get("/style.css", (req, res) => {
   res.sendFile(path.join(__dirname, "style.css"));
 });
 
-app.get("/donation", (req, res) => {
-  res.sendFile(path.join(__dirname, "pages", "donation.html"));
-});
-
-app.get("/payment", (req, res) => {
-  res.sendFile(path.join(__dirname, "pages", "payment.html"));
+app.get("/chat", (req, res) => {
+  res.sendFile(path.join(__dirname, "pages", "chat.html"));
 });
 
 app.get("/robots.txt", (req, res) => {
