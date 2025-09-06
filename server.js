@@ -68,7 +68,7 @@ app.get("/base64", (req, res) => {
 });
 
 app.get("/base64/:str", (req, res) => {
-  if (isBase64(req.params.str) {
+  if (isBase64(req.params.str)) {
     res.send(Buffer.from(req.params.str, "base64").toString("utf-8"));
   } else {
     res.send(Buffer.from(req.params.str, "utf-8"));
@@ -76,7 +76,7 @@ app.get("/base64/:str", (req, res) => {
 });
 
 app.post("/base64", (req, res) => {
-  if (isBase64(req.body) {
+  if (isBase64(req.body)) {
     res.send(Buffer.from(req.body, "base64").toString("utf-8"));
   } else {
     res.send(Buffer.from(req.body, "utf-8"));
