@@ -63,9 +63,7 @@ app.get("/healthz", (req, res) => {
 
 app.get("/journal/:key", (req, res) => {
   if (req.params.key == key) {
-    let journal = fs.readFileSync("journal.json");
-    journal = JSON.parse(journal);
-    res.json(journal);
+    res.sendFile(path.join(__dirname, "journal.json"));
   } else {
     res.sendFile(path.join(__dirname, "error", "403.html"));
   }
