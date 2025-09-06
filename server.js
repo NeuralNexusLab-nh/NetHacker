@@ -9,6 +9,12 @@ const app = express();
 const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
 const key = process.env.KEY;
 // Middleware
+function isBase64(str) {
+  if (typeof str !== "string" || str.length % 4) return false;
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(str) &&
+         Buffer.from(str, "base64").toString("base64") === str;
+}
+
 app.use(cookie());
 app.use(express.json());
 app.set("trust proxy", true);
@@ -55,6 +61,26 @@ app.use((req, res, next) => {
 // Routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "index.html"));
+});
+
+app.get("/base64", (req, res) => {
+  res.sendFile(path.join(__dirname, "pages", "base64.html"));
+});
+
+app.get("/base64/:str", (req, res) => {
+  if (isBase64(req.params.str) {
+    res.send(Buffer.from(req.params.str, "base64").toString("utf-8"));
+  } else {
+    res.send(Buffer.from(req.params.str, "utf-8"));
+  }
+});
+
+app.post("/base64", (req, res) => {
+  if (isBase64(req.body) {
+    res.send(Buffer.from(req.body, "base64").toString("utf-8"));
+  } else {
+    res.send(Buffer.from(req.body, "utf-8"));
+  }
 });
 
 app.get("/healthz", (req, res) => {
