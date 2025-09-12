@@ -36,7 +36,7 @@ app.use((req, res, next) => {
   var id = "";
   if (!req.cookies.id) {
     id = Math.floor(Math.random() * 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999).toString(16);
-    res.cookie("id", id, {"HttpOnly": true, "Secure": true, "SameSite": "none"});
+    res.cookie("id", id, {"httpOnly": true, "secure": true, "SameSite": "none"});
   } else {
     id = req.cookies.id;
   }
@@ -46,8 +46,12 @@ app.use((req, res, next) => {
 app.use(cookie());
 
 app.use((req, res, next) => {
-  var journal = JSON.parse(fs.readFileSync("journal.json"));
-  journal.push({"time": new Date(), "id": req.cookies.id, "user-agent": req.headers["user-agent"], "ip": req.ip, "path": req.path});
+  var Data;
+  fs.readFile("journal.json", "utf-8", (err, data) => {
+    Data = data
+  });
+  var journal = JSON.parse(Data);
+  journal.push({"time": new Date(), "ip": req.ip, "id": req.cookies.id, "user-agent": req.headers["user-agent"], "path": req.path});
   journal = JSON.stringify(journal);
   fs.writeFile("journal.json", journal, (err) => {});
   next();
@@ -55,6 +59,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
+  res.setHeader("Content-Security-Policy", "defult-src 'self';");
   next();
 });
          
