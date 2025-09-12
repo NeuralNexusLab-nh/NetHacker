@@ -35,7 +35,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   var id = "";
   if (!req.cookies.id) {
-    id = Math.floor(Math.random() * 99999999999999999999999999999999);
+    id = Math.floor(Math.random() * 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999).toString(16);
     res.cookie("id", id, {"HttpOnly": true, "Secure": true, "SameSite": "none"});
   } else {
     id = req.cookies.id;
