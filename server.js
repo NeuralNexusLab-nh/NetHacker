@@ -46,15 +46,15 @@ app.use((req, res, next) => {
 app.use(cookie());
 
 app.use((req, res, next) => {
-  var Data;
-  fs.readFile("journal.json", "utf-8", (err, data) => {
-    Data = data
-  });
-  var journal = JSON.parse(Data);
-  journal.push({"time": new Date(), "ip": req.ip, "id": req.cookies.id, "user-agent": req.headers["user-agent"], "path": req.path});
-  journal = JSON.stringify(journal);
-  fs.writeFile("journal.json", journal, (err) => {});
-  next();
+  fs.readFile("journal.json", "utf8", (err, data) => {
+    if (err) res.redirect("message/ERROR-503/FS%20ERROR");
+    else {
+      var journal = JSON.parse(data);
+      journal.push({"time": new Date(), "ip": req.ip, "id": req.cookies.id, "user-agent": req.headers["user-agent"], "path": req.path});
+      journal = JSON.stringify(journal);
+      fs.writeFile("journal.json", journal, (err) => {});
+    }
+    next();
 });
 
 app.use((req, res, next) => {
