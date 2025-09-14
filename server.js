@@ -52,20 +52,24 @@ app.use((req, res, next) => {
       var journal = JSON.parse(data);
       journal.push({"time": new Date(), "ip": req.ip, "id": req.cookies.id, "user-agent": req.headers["user-agent"], "path": req.path});
       journal = JSON.stringify(journal);
-      fs.writeFile("journal.json", journal, (err) => {});
+      fs.writeFile("journal.json", journal, (err) => {res.redirect("/message/ERROR-500/FS%20ERROR")});
     }
     next();
-});
+})});
 
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
-  res.setHeader("Content-Security-Policy", "defult-src 'self';");
+  res.setHeader("Content-Security-Policy", "defult-src 'self'; script-src 'self'; img-src 'self'; style-src 'self'; font-src 'self';");
   next();
 });
          
 // Routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "index.html"));
+});
+
+app.get("/pages/:path", (req, res) => {
+  res.sendFile(__dirname, "pages", req.params.path + ".html");
 });
 
 app.get("/base64", (req, res) => {
@@ -104,8 +108,16 @@ app.get("/style.css", (req, res) => {
   res.sendFile(path.join(__dirname, "style.css"));
 });
 
-app.get("/chat", (req, res) => {
-  res.sendFile(path.join(__dirname, "pages", "chat.html"));
+app.get("/message/:title/:sum", (req, res) => {
+  fs.readFile("/pages/message.html", "utf8", (err, data) => {
+    if (err) res.send(err);
+    else {
+      html = data;
+      html.replace("[TITLE]", req.params.title);
+      html.replace("[SUM]", req.params.sum);
+      res.send(html);
+    }
+  });
 });
 
 app.get("/robots.txt", (req, res) => {
