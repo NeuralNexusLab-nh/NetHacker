@@ -7,36 +7,11 @@
   <body>
     <h1>NetHacker Base64 encode & decode</h1>
     <p>press ENTER when you done the input</p>
-    <br><p>USE API:</p><br>
-    <input placeholder="text here..." id="api_text" onchange="api_text(this.value)">
     <br>
-    <input placeholder="base64 here..." id="api_base64" onchange="api_base64(this.value)">
-    <br><br>
-    <p>USE BROWSER FUNCTION:</p>
     <input placeholder="text here..." id="func_text" onchange="func_text(this.value)"><br>
     <input placeholder="base64 here..." id="func_base64" onchange="func_base64(this.value)"><br><br>
     <p>&copy; NeuralNexusLab NetHacker, All Rights Reserved.</p>
     <script>
-      function api_text (str) {
-        fetch("/base64", {
-          method: "POST",
-          headers: {"Content-Type": "text/plain"},
-          body: str
-        }).then(res => res.text())
-        .then((data) => {
-          document.getElementById("api_base64").value = data;
-        });
-      }
-      function api_base64 (str) {
-        fetch("/base64", {
-          method: "POST",
-          headers: {"Content-Type": "text/plain"},
-          body: str
-        }).then(res => res.text())
-        .then((data) => {
-          document.getElementById("api_text").value = data;
-        });
-      }
       function func_text (str) {
         document.getElementById("func_base64").value = btoa(str);
       }
