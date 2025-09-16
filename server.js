@@ -54,6 +54,10 @@ app.get("/headers", (req, res) => {
   res.send(req.headers);
 });
 
+app.get("/ads.txt", (req, res) => {
+  res.sendFile(path.join(__dirname, "pages", "ads.txt"));
+});
+
 app.get("/ip", (req, res) => {
   res.send(req.ip);
 });
