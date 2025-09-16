@@ -43,25 +43,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cookie());
-
-app.use((req, res, next) => {
-  fs.readFile("journal.json", "utf8", (err, data) => {
-    if (err) res.redirect("message/ERROR-503/FS%20ERROR");
-    else {
-      var journal = JSON.parse(data);
-      journal.push({"time": new Date(), "ip": req.ip, "id": req.cookies.id, "user-agent": req.headers["user-agent"], "path": req.path});
-      journal = JSON.stringify(journal);
-      fs.writeFile("journal.json", journal, (err) => {res.redirect("/message/ERROR-500/FS%20ERROR")});
-    }
-    next();
-})});
-
-app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
-  next();
-});
-         
 // Routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "index.html"));
@@ -93,14 +74,6 @@ app.post("/base64", (req, res) => {
 
 app.get("/healthz", (req, res) => {
   res.send("true");
-});
-
-app.get("/journal/:key", (req, res) => {
-  if (req.params.key == key) {
-    res.sendFile(path.join(__dirname, "journal.json"));
-  } else {
-    res.sendFile(path.join(__dirname, "error", "403.html"));
-  }
 });
 
 app.get("/style.css", (req, res) => {
