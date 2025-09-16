@@ -17,7 +17,7 @@
     <input placeholder="base64 here..." id="func_base64" onchange="func_base64(this.value)"><br><br>
     <p>&copy; NeuralNexusLab NetHacker, All Rights Reserved.</p>
     <script>
-      function apt_text (str) {
+      function ait_text (str) {
         fetch("/base64", {
           method: "POST",
           headers: {"Content-Type": "text/plain"},
@@ -27,7 +27,7 @@
           document.getElementById("api_base64").value = data;
         });
       }
-      function apt_base64 (str) {
+      function api_base64 (str) {
         fetch("/base64", {
           method: "POST",
           headers: {"Content-Type": "text/plain"},
