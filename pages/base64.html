@@ -17,7 +17,7 @@
     <input placeholder="base64 here..." id="func_base64" onchange="func_base64(this.value)"><br><br>
     <p>&copy; NeuralNexusLab NetHacker, All Rights Reserved.</p>
     <script>
-      function ait_text (str) {
+      function api_text (str) {
         fetch("/base64", {
           method: "POST",
           headers: {"Content-Type": "text/plain"},
