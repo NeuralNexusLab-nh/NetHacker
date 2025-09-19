@@ -6,7 +6,7 @@ const fs = require("fs");
 const app = express();
 
 //params
-const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS"];
+const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS", "Google", "NetHacker"];
 
 // Middleware
 app.use(cookie());
