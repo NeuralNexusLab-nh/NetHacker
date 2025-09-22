@@ -1,259 +1,251 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>NetAnalyst</title>
-  <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      color: #0f0;
-      font-family: 'Courier New', monospace;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+<!DOCTYPE html> 
+<html lang="en"> 
+<head>   
+  <meta charset="UTF-8" />   
+  <title>NetAnalyst</title>   
+  <style>     
+    body {       
+      margin: 0;       
+      background-color: #000;       
+      color: #0f0;       
+      font-family: 'Courier New', monospace;       
+      display: flex;       
+      flex-direction: column;       
+      height: 100vh;     
+    }      
 
-    a {
-      color: #0f0;
-      text-decoration: none;
-      position: relative;
-      transition: color 0.3s ease;
-    }
-    
-    a:hover {
-      color: #66ffe0;
-    }
+    a {       
+      color: #0f0;       
+      text-decoration: none;       
+      position: relative;       
+      transition: color 0.3s ease;     
+    }          
 
-    #header {
-      background-color: #010;
-      padding: 10px 20px;
-      font-size: 20px;
-      font-weight: bold;
-      border-bottom: 1px solid #0f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    a:hover {       
+      color: #66ffe0;     
+    }      
 
-    #header-buttons button {
-      margin-left: 10px;
-      background: #111;
-      color: #0f0;
-      border: 1px solid #0f0;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-family: 'Courier New', monospace;
-    }
+    #header {       
+      background-color: #010;       
+      padding: 10px 20px;       
+      font-size: 20px;       
+      font-weight: bold;       
+      border-bottom: 1px solid #0f0;       
+      display: flex;       
+      justify-content: space-between;       
+      align-items: center;     
+    }      
 
-    #header-buttons button:hover {
-      background: #222;
-    }
+    #header-buttons button {       
+      margin-left: 10px;       
+      background: #111;       
+      color: #0f0;       
+      border: 1px solid #0f0;       
+      padding: 5px 10px;       
+      cursor: pointer;       
+      font-family: 'Courier New', monospace;     
+    }      
 
-    #chat-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-    }
+    #header-buttons button:hover {       
+      background: #222;     
+    }      
 
-    .message {
-      margin-bottom: 16px;
-      white-space: pre-wrap;
-      line-height: 1.5;
-    }
+    #chat-container {       
+      flex: 1;       
+      overflow-y: auto;       
+      padding: 20px;     
+    }      
 
-    .user {
-      color: #00ffff;
-    }
+    .message {       
+      margin-bottom: 16px;       
+      white-space: pre-wrap;       
+      line-height: 1.5;     
+    }      
 
-    .assistant {
-      color: #00ff00;
-    }
+    .user {       
+      color: #00ffff;     
+    }      
 
-    #input-form {
-      display: flex;
-      border-top: 1px solid #0f0;
-    }
+    .assistant {       
+      color: #00ff00;     
+    }      
 
-    #input {
-      flex: 1;
-      background-color: #000;
-      color: #0f0;
-      border: none;
-      padding: 14px;
-      font-size: 16px;
-      outline: none;
-      font-family: 'Courier New', monospace;
-    }
+    #input-form {       
+      display: flex;       
+      border-top: 1px solid #0f0;     
+    }      
 
-    #submit {
-      background-color: #111;
-      color: #0f0;
-      border: none;
-      padding: 14px 20px;
-      cursor: pointer;
-      font-family: 'Courier New', monospace;
-    }
+    #input {       
+      flex: 1;       
+      background-color: #000;       
+      color: #0f0;       
+      border: none;       
+      padding: 14px;       
+      font-size: 16px;       
+      outline: none;       
+      font-family: 'Courier New', monospace;     
+    }      
 
-    #submit:hover {
-      background-color: #222;
-    }
+    #submit {       
+      background-color: #111;       
+      color: #0f0;       
+      border: none;       
+      padding: 14px 20px;       
+      cursor: pointer;       
+      font-family: 'Courier New', monospace;     
+    }      
 
-    ::selection {
-      background: #0f0;
-      color: #000;
-    }
-  </style>
-</head>
-<body>
+    #submit:hover {       
+      background-color: #222;     
+    }      
 
-  <div id="header">
-    <span>NetAnalyst</span>
-    <div id="header-buttons">
-      <button onclick="clearChat()">🧹 Clear</button>
-      <button onclick="exportChat()">💾 Export</button>
-    </div>
-  </div>
+    ::selection {       
+      background: #0f0;       
+      color: #000;     
+    }   
+  </style> 
+</head> 
+<body>   
 
-  <div id="chat-container"></div>
+  <div id="header">     
+    <span>NetAnalyst</span>     
+    <div id="header-buttons">       
+      <button onclick="clearChat()">🧹 Clear</button>       
+      <button onclick="exportChat()">💾 Export</button>     
+    </div>   
+  </div>    
 
-  <form id="input-form">
-    <input type="text" id="input" placeholder="Ask something..." autocomplete="off" />
-    <button type="submit" id="submit">Send</button>
-  </form>
-  <br>
-  <p>AI can also make mistakes, please carefully review the content. Our company is not responsible for any errors.<br>Powered by <a href="https://aimlapi.com/" target="_blank">AIMLAPI</a> - Gemma3</p>
-  <script>
-    const chatContainer = document.getElementById('chat-container');
-    const inputForm = document.getElementById('input-form');
-    const inputField = document.getElementById('input');
-    const storageKey = 'netanalyst_chat';
-    const cooldownKey = 'netanalyst_lastMessageTime';
+  <div id="chat-container"></div>    
 
-    let isTyping = false;
+  <form id="input-form">     
+    <input type="text" id="input" placeholder="Ask something..." autocomplete="off" />     
+    <button type="submit" id="submit">Send</button>   
+  </form>   
 
-    function loadChat() {
-      const saved = localStorage.getItem(storageKey);
-      if (!saved) return;
-      try {
-        const messages = JSON.parse(saved);
-        messages.forEach(msg => {
-          displayMessage(msg.text, msg.role, false);
-        });
-      } catch (e) {
-        console.error('Load error:', e);
-      }
-    }
+  <br>   
+  <p>
+    AI can also make mistakes, please carefully review the content. Our company is not responsible for any errors.<br>
+    Powered by <a href="https://aimlapi.com/" target="_blank">AIMLAPI</a> - Gemma3
+  </p>   
 
-    function saveMessage(text, role) {
-      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      history.push({ text, role });
-      localStorage.setItem(storageKey, JSON.stringify(history));
-    }
+  <script>     
+    const chatContainer = document.getElementById('chat-container');     
+    const inputForm = document.getElementById('input-form');     
+    const inputField = document.getElementById('input');     
+    const storageKey = 'netanalyst_chat';     
 
-    function displayMessage(text, role, save = true) {
-      const div = document.createElement('div');
-      div.className = 'message ' + role;
-      div.textContent = (role === 'user' ? 'You: ' : 'AI: ') + text;
-      chatContainer.appendChild(div);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-      if (save) saveMessage(text, role);
-    }
+    let isTyping = false;      
 
-    function typeWriter(text, role, callback = () => {}) {
-      const div = document.createElement('div');
-      div.className = 'message ' + role;
-      chatContainer.appendChild(div);
+    function loadChat() {       
+      const saved = localStorage.getItem(storageKey);       
+      if (!saved) return;       
+      try {         
+        const messages = JSON.parse(saved);         
+        messages.forEach(msg => {           
+          displayMessage(msg.text, msg.role, false);         
+        });       
+      } catch (e) {         
+        console.error('Load error:', e);       
+      }     
+    }      
 
-      const prefix = role === 'user' ? 'You: ' : 'AI: ';
-      let i = 0;
-      isTyping = true;
+    function saveMessage(text, role) {       
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');       
+      history.push({ text, role });       
+      localStorage.setItem(storageKey, JSON.stringify(history));     
+    }      
 
-      function type() {
-        div.textContent = prefix + text.slice(0, i);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-        if (i < text.length) {
-          i++;
-          setTimeout(type, 20);
-        } else {
-          isTyping = false;
-          saveMessage(text, role);
-          callback();
-        }
-      }
+    function displayMessage(text, role, save = true) {       
+      const div = document.createElement('div');       
+      div.className = 'message ' + role;       
+      div.textContent = (role === 'user' ? 'You: ' : 'AI: ') + text;       
+      chatContainer.appendChild(div);       
+      chatContainer.scrollTop = chatContainer.scrollHeight;       
+      if (save) saveMessage(text, role);     
+    }      
 
-      type();
-    }
+    function typeWriter(text, role, callback = () => {}) {       
+      const div = document.createElement('div');       
+      div.className = 'message ' + role;       
+      chatContainer.appendChild(div);        
 
-    function canSendMessage() {
-      if (isTyping) return false;
+      const prefix = role === 'user' ? 'You: ' : 'AI: ';       
+      let i = 0;       
+      isTyping = true;        
 
-      const lastTime = localStorage.getItem(cooldownKey);
-      if (!lastTime) return true;
+      function type() {         
+        div.textContent = prefix + text.slice(0, i);         
+        chatContainer.scrollTop = chatContainer.scrollHeight;         
+        if (i < text.length) {           
+          i++;           
+          setTimeout(type, 20);         
+        } else {           
+          isTyping = false;           
+          saveMessage(text, role);           
+          callback();         
+        }       
+      }        
 
-      const now = Date.now();
-      const elapsed = now - parseInt(lastTime, 10);
+      type();     
+    }      
 
-      return elapsed >= 60000; // 60 seconds
-    }
+    function canSendMessage() {       
+      return !isTyping;     
+    }      
 
-    inputForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const question = inputField.value.trim();
-      if (!question) return;
+    inputForm.addEventListener('submit', async (e) => {       
+      e.preventDefault();       
+      const question = inputField.value.trim();       
+      if (!question) return;        
 
-      if (!canSendMessage()) {
-        alert('Please wait at least 60 seconds between messages or until the current response is done.');
-        return;
-      }
+      if (!canSendMessage()) {         
+        alert('Please wait until the current response is done.');         
+        return;       
+      }        
 
-      inputField.value = '';
+      inputField.value = '';        
 
-      // ⏱️ 設定 cooldown：從送出時開始計算
-      localStorage.setItem(cooldownKey, Date.now().toString());
+      typeWriter(question, 'user', async () => {         
+        try {           
+          const res = await fetch('/api?data=' + encodeURIComponent(question));           
+          const answer = await res.text();           
+          typeWriter(answer, 'assistant');         
+        } catch (err) {           
+          typeWriter('Error: Failed to get response.', 'assistant');           
+          console.error(err);         
+        }       
+      });     
+    });      
 
-      typeWriter(question, 'user', async () => {
-        try {
-          const res = await fetch('/api?data=' + encodeURIComponent(question));
-          const answer = await res.text();
-          typeWriter(answer, 'assistant');
-        } catch (err) {
-          typeWriter('Error: Failed to get response.', 'assistant');
-          console.error(err);
-        }
-      });
-    });
+    function clearChat() {       
+      if (confirm('Clear all chat history?')) {         
+        localStorage.removeItem(storageKey);         
+        chatContainer.innerHTML = '';       
+      }     
+    }      
 
-    function clearChat() {
-      if (confirm('Clear all chat history?')) {
-        localStorage.removeItem(storageKey);
-        localStorage.removeItem(cooldownKey);
-        chatContainer.innerHTML = '';
-      }
-    }
+    function exportChat() {       
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');       
+      if (history.length === 0) {         
+        alert('No chat to export.');         
+        return;       
+      }        
 
-    function exportChat() {
-      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      if (history.length === 0) {
-        alert('No chat to export.');
-        return;
-      }
+      let output = 'NetAnalyst Chat Export\n\n';       
+      history.forEach(msg => {         
+        output += (msg.role === 'user' ? 'You: ' : 'AI: ') + msg.text + '\n\n';       
+      });        
 
-      let output = 'NetAnalyst Chat Export\n\n';
-      history.forEach(msg => {
-        output += (msg.role === 'user' ? 'You: ' : 'AI: ') + msg.text + '\n\n';
-      });
+      const blob = new Blob([output], { type: 'text/plain' });       
+      const link = document.createElement('a');       
+      link.href = URL.createObjectURL(blob);       
+      link.download = 'netanalyst_chat.txt';       
+      document.body.appendChild(link);       
+      link.click();       
+      document.body.removeChild(link);     
+    }      
 
-      const blob = new Blob([output], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'netanalyst_chat.txt';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    loadChat();
-  </script>
-</body>
+    loadChat();   
+  </script> 
+</body> 
 </html>
