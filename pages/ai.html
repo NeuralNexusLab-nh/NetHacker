@@ -112,6 +112,7 @@
   </form>
 
   <script>
+    var b = true;
     const chatContainer = document.getElementById('chat-container');
     const inputForm = document.getElementById('input-form');
     const inputField = document.getElementById('input');
@@ -168,20 +169,25 @@
     }
 
     inputForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const question = inputField.value.trim();
-      if (!question) return;
+      if (b) {
+        b = false;
+        e.preventDefault();
+        const question = inputField.value.trim();
+        if (!question) return;
+        
+        typeWriter(question, 'user');
+        inputField.value = '';
 
-      typeWriter(question, 'user');
-      inputField.value = '';
-
-      try {
-        const res = await fetch('/api?data=' + encodeURIComponent(question));
-        const answer = await res.text();
-        typeWriter(answer, 'assistant');
-      } catch (err) {
-        typeWriter('Error: Failed to get response.', 'assistant');
-        console.error(err);
+        try {
+          const res = await fetch('/api?data=' + encodeURIComponent(question));
+          const answer = await res.text();
+          typeWriter(answer, 'assistant');
+          b = true;
+        } catch (err) {
+          typeWriter('Error: Failed to get response.', 'assistant');
+          console.error(err);
+          b = true;
+        }
       }
     });
 
