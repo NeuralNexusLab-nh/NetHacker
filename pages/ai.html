@@ -14,6 +14,24 @@
       height: 100vh;
     }
 
+    a {
+      color: green;
+      text-decoration: none;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    
+    a::after {
+      content: '_';
+      animation: blink 1s infinite;
+      position: absolute;
+      right: -10px;
+    }
+    
+    a:hover {
+      color: #66ffe0;
+    }
+
     #header {
       background-color: #010;
       padding: 10px 20px;
@@ -111,7 +129,7 @@
     <button type="submit" id="submit">Send</button>
   </form>
   <br>
-  <p>AI can also make mistakes, please carefully review the content. Our company is not responsible for any errors.<br>Powered by </p><a href="https://aimlapi.com/" target="_blank">AIMLAPI</a><p> - Gemma3</p>
+  <p>AI can also make mistakes, please carefully review the content. Our company is not responsible for any errors.<br>Powered by <a href="https://aimlapi.com/" target="_blank">AIMLAPI</a> - Gemma3</p>
   <script>
     const chatContainer = document.getElementById('chat-container');
     const inputForm = document.getElementById('input-form');
