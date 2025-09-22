@@ -178,7 +178,7 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;         
         if (i < text.length) {           
           i++;           
-          setTimeout(type, 20);         
+          setTimeout(type, Math.floor(Math.random() * 30 + 3));
         } else {           
           isTyping = false;           
           saveMessage(text, role);           
