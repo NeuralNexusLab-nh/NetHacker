@@ -113,136 +113,135 @@
 
   <script>
     const chatContainer = document.getElementById('chat-container');
-const inputForm = document.getElementById('input-form');
-const inputField = document.getElementById('input');
-const storageKey = 'netanalyst_chat';
-const cooldownKey = 'netanalyst_lastMessageTime';
+    const inputForm = document.getElementById('input-form');
+    const inputField = document.getElementById('input');
+    const storageKey = 'netanalyst_chat';
+    const cooldownKey = 'netanalyst_lastMessageTime';
 
-let isTyping = false;
+    let isTyping = false;
 
-function loadChat() {
-  const saved = localStorage.getItem(storageKey);
-  if (!saved) return;
-  try {
-    const messages = JSON.parse(saved);
-    messages.forEach(msg => {
-      displayMessage(msg.text, msg.role, false);
+    function loadChat() {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
+      try {
+        const messages = JSON.parse(saved);
+        messages.forEach(msg => {
+          displayMessage(msg.text, msg.role, false);
+        });
+      } catch (e) {
+        console.error('Load error:', e);
+      }
+    }
+
+    function saveMessage(text, role) {
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      history.push({ text, role });
+      localStorage.setItem(storageKey, JSON.stringify(history));
+    }
+
+    function displayMessage(text, role, save = true) {
+      const div = document.createElement('div');
+      div.className = 'message ' + role;
+      div.textContent = (role === 'user' ? 'You: ' : 'AI: ') + text;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      if (save) saveMessage(text, role);
+    }
+
+    function typeWriter(text, role, callback = () => {}) {
+      const div = document.createElement('div');
+      div.className = 'message ' + role;
+      chatContainer.appendChild(div);
+
+      const prefix = role === 'user' ? 'You: ' : 'AI: ';
+      let i = 0;
+      isTyping = true;
+
+      function type() {
+        div.textContent = prefix + text.slice(0, i);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        if (i < text.length) {
+          i++;
+          setTimeout(type, 20);
+        } else {
+          isTyping = false;
+          saveMessage(text, role);
+          callback();
+        }
+      }
+
+      type();
+    }
+
+    function canSendMessage() {
+      if (isTyping) return false;
+
+      const lastTime = localStorage.getItem(cooldownKey);
+      if (!lastTime) return true;
+
+      const now = Date.now();
+      const elapsed = now - parseInt(lastTime, 10);
+
+      return elapsed >= 60000; // 60 seconds
+    }
+
+    inputForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const question = inputField.value.trim();
+      if (!question) return;
+
+      if (!canSendMessage()) {
+        alert('Please wait at least 60 seconds between messages or until the current response is done.');
+        return;
+      }
+
+      inputField.value = '';
+
+      // ⏱️ 設定 cooldown：從送出時開始計算
+      localStorage.setItem(cooldownKey, Date.now().toString());
+
+      typeWriter(question, 'user', async () => {
+        try {
+          const res = await fetch('/api?data=' + encodeURIComponent(question));
+          const answer = await res.text();
+          typeWriter(answer, 'assistant');
+        } catch (err) {
+          typeWriter('Error: Failed to get response.', 'assistant');
+          console.error(err);
+        }
+      });
     });
-  } catch (e) {
-    console.error('Load error:', e);
-  }
-}
 
-function saveMessage(text, role) {
-  const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-  history.push({ text, role });
-  localStorage.setItem(storageKey, JSON.stringify(history));
-}
-
-function displayMessage(text, role, save = true) {
-  const div = document.createElement('div');
-  div.className = 'message ' + role;
-  div.textContent = (role === 'user' ? 'You: ' : 'AI: ') + text;
-  chatContainer.appendChild(div);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
-  if (save) saveMessage(text, role);
-}
-
-function typeWriter(text, role, callback = () => {}) {
-  const div = document.createElement('div');
-  div.className = 'message ' + role;
-  chatContainer.appendChild(div);
-
-  const prefix = role === 'user' ? 'You: ' : 'AI: ';
-  let i = 0;
-  isTyping = true;
-
-  function type() {
-    div.textContent = prefix + text.slice(0, i);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    if (i < text.length) {
-      i++;
-      setTimeout(type, 20);
-    } else {
-      isTyping = false;
-      saveMessage(text, role);
-      callback();
+    function clearChat() {
+      if (confirm('Clear all chat history?')) {
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(cooldownKey);
+        chatContainer.innerHTML = '';
+      }
     }
-  }
 
-  type();
-}
+    function exportChat() {
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (history.length === 0) {
+        alert('No chat to export.');
+        return;
+      }
 
-function canSendMessage() {
-  if (isTyping) return false;
-
-  const lastTime = localStorage.getItem(cooldownKey);
-  if (!lastTime) return true;
-
-  const now = Date.now();
-  const elapsed = now - parseInt(lastTime, 10);
-
-  return elapsed >= 30000; // 30 seconds
-}
-
-inputForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const question = inputField.value.trim();
-  if (!question) return;
-
-  if (!canSendMessage()) {
-    alert('Please wait at least 30 seconds between messages or until the current response is done.');
-    return;
-  }
-
-  inputField.value = '';
-  typeWriter(question, 'user', async () => {
-    try {
-      const res = await fetch('/api?data=' + encodeURIComponent(question));
-      const answer = await res.text();
-      typeWriter(answer, 'assistant', () => {
-        localStorage.setItem(cooldownKey, Date.now().toString());
+      let output = 'NetAnalyst Chat Export\n\n';
+      history.forEach(msg => {
+        output += (msg.role === 'user' ? 'You: ' : 'AI: ') + msg.text + '\n\n';
       });
-    } catch (err) {
-      typeWriter('Error: Failed to get response.', 'assistant', () => {
-        localStorage.setItem(cooldownKey, Date.now().toString());
-      });
-      console.error(err);
+
+      const blob = new Blob([output], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'netanalyst_chat.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-  });
-});
 
-function clearChat() {
-  if (confirm('Clear all chat history?')) {
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem(cooldownKey);
-    chatContainer.innerHTML = '';
-  }
-}
-
-function exportChat() {
-  const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-  if (history.length === 0) {
-    alert('No chat to export.');
-    return;
-  }
-
-  let output = 'NetAnalyst Chat Export\n\n';
-  history.forEach(msg => {
-    output += (msg.role === 'user' ? 'You: ' : 'AI: ') + msg.text + '\n\n';
-  });
-
-  const blob = new Blob([output], { type: 'text/plain' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'netanalyst_chat.txt';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-loadChat();
-
+    loadChat();
   </script>
 </body>
 </html>
