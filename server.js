@@ -17,7 +17,7 @@ function ai(question) {
     .create({
       model: 'google/gemma-3-12b-it',
       messages: [
-        { role: 'system', content: 'You are an AI named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty (VDP same) very well.' },
+        { role: 'system', content: 'You are an AI named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty (VDP same) very well. Or you can just talk to user.' },
         { role: 'user', content: question },
       ],
     })
