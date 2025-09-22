@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Password Generator - NetHacker</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <h1>Password Generator</h1>
+    <br>
+    <p id="pw"></p>
+    <br>
+    <button onclick="def()">Generate</button>
+    <script>
+      const char = [
+        ...'abcdefghijklmnopqrstuvwxyz',
+        ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        ...'0123456789',
+        '#', '@', '!', '?'
+      ];
+      function def () {
+        var passwd = "";
+        for (let i = 0; i < Math.floor(Math.random() * 4) + 9; i++) {
+          passwd += char[Math.floor(Math.random() * char.length)];
+        }
+        document.getElementById("pw").innerHTML = passwd;
+      }
+    </script>
+  </body>
+</html>
