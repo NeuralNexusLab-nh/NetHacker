@@ -117,7 +117,6 @@
     const inputField = document.getElementById('input');
     const storageKey = 'netanalyst_chat';
 
-    // 載入歷史紀錄
     function loadChat() {
       const saved = localStorage.getItem(storageKey);
       if (!saved) return;
@@ -131,14 +130,12 @@
       }
     }
 
-    // 儲存訊息
     function saveMessage(text, role) {
       const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
       history.push({ text, role });
       localStorage.setItem(storageKey, JSON.stringify(history));
     }
 
-    // 顯示訊息
     function displayMessage(text, role, save = true) {
       const div = document.createElement('div');
       div.className = 'message ' + role;
@@ -148,7 +145,6 @@
       if (save) saveMessage(text, role);
     }
 
-    // 打字效果
     function typeWriter(text, role) {
       const div = document.createElement('div');
       div.className = 'message ' + role;
@@ -162,7 +158,7 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;
         if (i < text.length) {
           i++;
-          setTimeout(type, 20); // 打字速度
+          setTimeout(type, 20); 
         } else {
           saveMessage(text, role);
         }
@@ -171,7 +167,6 @@
       type();
     }
 
-    // 傳送問題
     inputForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const question = inputField.value.trim();
@@ -190,7 +185,6 @@
       }
     });
 
-    // 清除聊天
     function clearChat() {
       if (confirm('Clear all chat history?')) {
         localStorage.removeItem(storageKey);
@@ -198,7 +192,6 @@
       }
     }
 
-    // 匯出聊天
     function exportChat() {
       const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
       if (history.length === 0) {
@@ -220,7 +213,6 @@
       document.body.removeChild(link);
     }
 
-    // 初始化
     loadChat();
   </script>
 </body>
