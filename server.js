@@ -72,7 +72,7 @@ app.get("/ai", (req, res) => {
 });
 
 app.get("/api", (req, res) => {
-  if (req.headers["referer"].includes("nethacker.cloud") {
+  if (req.headers["referer"].includes("nethacker.cloud")) {
     const q = req.query.data;
     ai(q).then(data => {
       res.send(data);
