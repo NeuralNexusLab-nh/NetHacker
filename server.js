@@ -11,10 +11,11 @@ const app = express();
 
 //params
 const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS", "Google", "NetHacker"];
+
 function ai(question) {
   return api.chat.completions
     .create({
-      model: 'openai/gpt-5-chat-latest',
+      model: 'google/gemma-3-12b-it',
       messages: [
         { role: 'system', content: 'You are an AI named "NetAnalyst", you can help user to do many things.' },
         { role: 'user', content: question },
