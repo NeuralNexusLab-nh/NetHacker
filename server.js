@@ -3,10 +3,31 @@ const cookie = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const fs = require("fs");
+const { OpenAI } = require('openai');
+const api = new OpenAI({
+  baseURL: 'https://api.aimlapi.com/v1',
+  apiKey: process.env.API,
+});
 const app = express();
 
 //params
 const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS", "Google", "NetHacker"];
+function ai(question) {
+  return api.chat.completions
+    .create({
+      model: 'openai/gpt-5-chat-latest',
+      messages: [
+        { role: 'system', content: 'You are an AI named "NetAnalyst", you can help user to do many things.' },
+        { role: 'user', content: question },
+      ],
+    })
+    .then(result => result.choices[0].message.content)
+    .catch(err => {
+      console.error('Error calling AI:', err.message || err);
+      throw err;
+    });
+}
+
 
 // Middleware
 app.use(cookie());
@@ -42,12 +63,15 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "index.html"));
 });
 
-app.get("/random", (req, res) => {
-  res.send(Math.floor(Math.random() * 9999999999999999999999999999999999999999999999999999999999999));
+app.get("/ai", (req, res) => {
+  res.sendFile(path.join(__dirname, "pages", "index.html"));
 });
 
-app.get("/hex", (req, res) => {
-  res.send(Math.floor(Math.random() * 9999999999999999999999999999999999999999999999999999999999999).toString(16));
+app.get("/api", (req, res) => {
+  const q = req.query.data;
+  ai(q).then(data => {
+    res.send(data);
+  });
 });
 
 app.get("/headers", (req, res) => {
