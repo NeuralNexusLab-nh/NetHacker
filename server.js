@@ -72,10 +72,14 @@ app.get("/ai", (req, res) => {
 });
 
 app.get("/api", (req, res) => {
-  const q = req.query.data;
-  ai(q).then(data => {
-    res.send(data);
-  });
+  if (req.headers["referer"].includes("nethacker.cloud") {
+    const q = req.query.data;
+    ai(q).then(data => {
+      res.send(data);
+    });
+  } else {
+    res.sendFile(path.join(__dirname, "error", "403.html"));
+  }
 });
 
 app.get("/headers", (req, res) => {
@@ -100,18 +104,6 @@ app.get("/healthz", (req, res) => {
 
 app.get("/style.css", (req, res) => {
   res.sendFile(path.join(__dirname, "style.css"));
-});
-
-app.get("/message/:title/:sum", (req, res) => {
-  fs.readFile("/pages/message.html", "utf8", (err, data) => {
-    if (err) res.send(err);
-    else {
-      html = data;
-      html.replace("[TITLE]", req.params.title);
-      html.replace("[SUM]", req.params.sum);
-      res.send(html);
-    }
-  });
 });
 
 app.get("/robots.txt", (req, res) => {
