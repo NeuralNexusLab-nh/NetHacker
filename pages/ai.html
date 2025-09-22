@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NetAnalyst</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #header {
+      background-color: #010;
+      padding: 10px 20px;
+      font-size: 20px;
+      font-weight: bold;
+      border-bottom: 1px solid #0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #header-buttons button {
+      margin-left: 10px;
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+    }
+
+    #header-buttons button:hover {
+      background: #222;
+    }
+
+    #chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .message {
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .user {
+      color: #00ffff;
+    }
+
+    .assistant {
+      color: #00ff00;
+    }
+
+    #input-form {
+      display: flex;
+      border-top: 1px solid #0f0;
+    }
+
+    #input {
+      flex: 1;
+      background-color: #000;
+      color: #0f0;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      outline: none;
+      font-family: 'Courier New', monospace;
+    }
+
+    #submit {
+      background-color: #111;
+      color: #0f0;
+      border: none;
+      padding: 14px 20px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+    }
+
+    #submit:hover {
+      background-color: #222;
+    }
+
+    ::selection {
+      background: #0f0;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header">
+    <span>NetAnalyst</span>
+    <div id="header-buttons">
+      <button onclick="clearChat()">🧹 Clear</button>
+      <button onclick="exportChat()">💾 Export</button>
+    </div>
+  </div>
+
+  <div id="chat-container"></div>
+
+  <form id="input-form">
+    <input type="text" id="input" placeholder="Ask something..." autocomplete="off" />
+    <button type="submit" id="submit">Send</button>
+  </form>
+
+  <script>
+    const chatContainer = document.getElementById('chat-container');
+    const inputForm = document.getElementById('input-form');
+    const inputField = document.getElementById('input');
+    const storageKey = 'netanalyst_chat';
+
+    // 載入歷史紀錄
+    function loadChat() {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
+      try {
+        const messages = JSON.parse(saved);
+        messages.forEach(msg => {
+          displayMessage(msg.text, msg.role, false);
+        });
+      } catch (e) {
+        console.error('Load error:', e);
+      }
+    }
+
+    // 儲存訊息
+    function saveMessage(text, role) {
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      history.push({ text, role });
+      localStorage.setItem(storageKey, JSON.stringify(history));
+    }
+
+    // 顯示訊息
+    function displayMessage(text, role, save = true) {
+      const div = document.createElement('div');
+      div.className = 'message ' + role;
+      div.textContent = (role === 'user' ? 'You: ' : 'AI: ') + text;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      if (save) saveMessage(text, role);
+    }
+
+    // 打字效果
+    function typeWriter(text, role) {
+      const div = document.createElement('div');
+      div.className = 'message ' + role;
+      chatContainer.appendChild(div);
+
+      const prefix = role === 'user' ? 'You: ' : 'AI: ';
+      let i = 0;
+
+      function type() {
+        div.textContent = prefix + text.slice(0, i);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        if (i < text.length) {
+          i++;
+          setTimeout(type, 20); // 打字速度
+        } else {
+          saveMessage(text, role);
+        }
+      }
+
+      type();
+    }
+
+    // 傳送問題
+    inputForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const question = inputField.value.trim();
+      if (!question) return;
+
+      typeWriter(question, 'user');
+      inputField.value = '';
+
+      try {
+        const res = await fetch('/api?data=' + encodeURIComponent(question));
+        const answer = await res.text();
+        typeWriter(answer, 'assistant');
+      } catch (err) {
+        typeWriter('Error: Failed to get response.', 'assistant');
+        console.error(err);
+      }
+    });
+
+    // 清除聊天
+    function clearChat() {
+      if (confirm('Clear all chat history?')) {
+        localStorage.removeItem(storageKey);
+        chatContainer.innerHTML = '';
+      }
+    }
+
+    // 匯出聊天
+    function exportChat() {
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (history.length === 0) {
+        alert('No chat to export.');
+        return;
+      }
+
+      let output = 'NetAnalyst Chat Export\n\n';
+      history.forEach(msg => {
+        output += (msg.role === 'user' ? 'You: ' : 'AI: ') + msg.text + '\n\n';
+      });
+
+      const blob = new Blob([output], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'netanalyst_chat.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 初始化
+    loadChat();
+  </script>
+</body>
+</html>
