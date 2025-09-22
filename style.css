@@ -8,7 +8,7 @@
 
 body {
   background-color: #0b0f0f;
-  color: green;
+  color: #0f0;
   font-family: 'JetBrains Mono', monospace;
   line-height: 1.7;
   padding: 2rem;
@@ -16,7 +16,7 @@ body {
 }
 
 a {
-  color: green;
+  color: #0f0;
   text-decoration: none;
   position: relative;
   transition: color 0.3s ease;
@@ -35,7 +35,7 @@ a:hover {
 
 input, textarea {
   background: rgba(0, 0, 0, 0.6);
-  color: green;
+  color: #0f0;
   border: 1px solid #00ffcc;
   padding: 12px;
   width: 100%;
@@ -53,7 +53,7 @@ input:focus, textarea:focus {
 
 button {
   background: rgba(0, 0, 0, 0.6);
-  color: green;
+  color: #0f0;
   border: 2px solid #00ffcc;
   padding: 12px 28px;
   font-family: 'JetBrains Mono', monospace;
@@ -78,7 +78,7 @@ button:active {
 }
 
 h1, h2, h3, p {
-  color: green;
+  color: #0f0;
   margin-bottom: 1.2rem;
   text-shadow: 0 0 6px #00ffcc88;
 }
