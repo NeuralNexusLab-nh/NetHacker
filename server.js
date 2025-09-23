@@ -78,10 +78,11 @@ app.get("/ai", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "ai.html"));
 });
 
-app.get("/api", (req, res) => {
+app.post("/api", (req, res) => {
   if (req.headers["referer"].includes("nethacker.cloud")) {
-    const q = req.query.data;
-    ai(q).then(data => {
+    const q = req.body.data;
+    const ht = JSON.stringify(req.body.history);
+    ai(ht, q).then(data => {
       res.send(data);
     });
   } else {
