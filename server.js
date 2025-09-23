@@ -34,6 +34,13 @@ app.use(cookie());
 app.use(express.json());
 app.set("trust proxy", true);
 app.use((req, res, next) => {
+  if (req.headers["host"] != "nethacker.cloud") {
+    res.redirect("https://nethacker.cloud");
+  } else {
+    next();
+  }
+});
+app.use((req, res, next) => {
   var isUa = false;
   for (let i = 0; i < ua.length; i++) {
     if (req.headers["user-agent"].includes(ua[i])) {
