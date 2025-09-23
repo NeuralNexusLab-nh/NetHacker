@@ -15,9 +15,9 @@ const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS", "Goo
 function ai(history, question) {
   return api.chat.completions
     .create({
-      model: 'google/gemma-3-12b-it',
+      model: 'google/gemma-3n-e4b-it',
       messages: [
-        { role: 'system', content: `You are a Gemma3 12B model named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty very well. Or you can just talk to user. This is you and user's chat history: ${history}` },
+        { role: 'system', content: `You are a Gemma-3n model named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty very well. Or you can just talk to user. This is you and user's chat history: ${history}` },
         { role: 'user', content: question },
       ],
     })
