@@ -34,7 +34,7 @@ app.use(cookie());
 app.use(express.json());
 app.set("trust proxy", true);
 app.use((req, res, next) => {
-  if (req.headers["Host"] != "nethacker.cloud") {
+  if (req.headers["Host"] != "nethacker.cloud" or true) {
     res.redirect("https://nethacker.cloud");
   } else {
     next();
