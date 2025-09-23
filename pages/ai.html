@@ -132,7 +132,7 @@
     const chatContainer = document.getElementById('chat-container');     
     const inputForm = document.getElementById('input-form');     
     const inputField = document.getElementById('input');     
-    const storageKey = 'netanalyst_chat';     
+    const storageKey = 'netanalyst_chat_history';     
 
     let isTyping = false;      
 
@@ -207,7 +207,11 @@
 
       typeWriter(question, 'user', async () => {         
         try {           
-          const res = await fetch('/api?data=' + encodeURIComponent(question));           
+          const res = await fetch('/api', {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({"history": localStorage.getItem(storageKey), "data": question})
+          });           
           const answer = await res.text();           
           typeWriter(answer, 'assistant');         
         } catch (err) {           
