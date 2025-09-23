@@ -12,12 +12,12 @@ const app = express();
 //params
 const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS", "Google", "NetHacker"];
 
-function ai(question) {
+function ai(history, question) {
   return api.chat.completions
     .create({
       model: 'google/gemma-3-12b-it',
       messages: [
-        { role: 'system', content: 'You are an AI named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty (VDP same) very well. Or you can just talk to user.' },
+        { role: 'system', content: `You are a Gemma3 12B model named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty very well. Or you can just talk to user. This is you and user's chat history: ${history}` },
         { role: 'user', content: question },
       ],
     })
@@ -33,6 +33,13 @@ function ai(question) {
 app.use(cookie());
 app.use(express.json());
 app.set("trust proxy", true);
+app.use((req, res, next) => {
+  if (req.headers["Host"] != "nethacker.cloud") {
+    res.redirect("https://nethacker.cloud");
+  } else {
+    next();
+  }
+});
 app.use((req, res, next) => {
   var isUa = false;
   for (let i = 0; i < ua.length; i++) {
