@@ -17,7 +17,7 @@ function ai(history, question) {
     .create({
       model: 'google/gemma-3-12b-it',
       messages: [
-        { role: 'system', content: `You are a Gemma-3n model named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty very well. Or you can just talk to user. This is you and user's chat history: ${history}`},
+        { role: 'system', content: `You are a Gemma-3 model named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty very well. Or you can just talk to user. This is you and user's chat history: ${history}`},
         { role: 'user', content: question },
       ],
     })
