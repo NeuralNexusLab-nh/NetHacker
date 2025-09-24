@@ -210,7 +210,7 @@
           const res = await fetch('/api', {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({"history": localStorage.getItem(storageKey), "data": question})
+            body: JSON.stringify({"history": JSON.stringify(localStorage.getItem(storageKey)), "data": question})
           });           
           const answer = await res.text();           
           typeWriter(answer, 'assistant');         
