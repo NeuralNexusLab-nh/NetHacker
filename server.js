@@ -15,9 +15,9 @@ const ua = ["Firefox", "Chrome", "Edge", "Safari", "OPR", "CriOS", "FxiOS", "Goo
 function ai(history, question) {
   return api.chat.completions
     .create({
-      model: 'google/gemma-3n-e4b-it',
+      model: 'google/gemma-3-12b-it',
       messages: [
-        { role: 'system', content: `You are a Gemma-3n model named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty very well. Or you can just talk to user. This is you and user's chat history: ${history}` },
+        { role: 'system', content: `You are a Gemma-3n model named "NetAnalyst", you can help user to do many things. And you can analysis to do Website Penetration and Bug Bounty very well. Or you can just talk to user. This is you and user's chat history: ${history}`},
         { role: 'user', content: question },
       ],
     })
@@ -81,7 +81,7 @@ app.get("/ai", (req, res) => {
 app.post("/api", (req, res) => {
   if (req.headers["referer"].includes("nethacker.cloud")) {
     const q = req.body.data;
-    const ht = JSON.stringify(req.body.history);
+    const ht = req.body.history;
     ai(ht, q).then(data => {
       res.send(data);
     });
