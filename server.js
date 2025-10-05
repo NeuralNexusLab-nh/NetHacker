@@ -65,6 +65,18 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(cookie());
+
+app.use((req, res, next) => {
+  data = `${new Date()} ${req.cookies.id || "0000"} ${req.ip} ${req.method} ${req.path}`;
+  var journal = JSON.parse(fs.readFileSync("./journal.json", "utf8"));
+  journal.push(data);
+  journal = JSON.stringify(journal);
+  fs.writeFile("./journal.json", journal, (err) => {
+    next();
+  });
+});
+
 // Routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "index.html"));
@@ -72,6 +84,12 @@ app.get("/", (req, res) => {
 
 app.get("/pw", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "pw.html"));
+});
+
+app.get("/journal/:key", (req, res) => {
+  if (req.params.key == "0902") {
+    res.sendFile("./journal.json");
+  }
 });
 
 app.get("/ai", (req, res) => {
