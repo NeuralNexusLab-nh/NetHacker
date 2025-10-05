@@ -88,7 +88,9 @@ app.get("/pw", (req, res) => {
 
 app.get("/journal/:key", (req, res) => {
   if (req.params.key == "0902") {
-    res.sendFile("./journal.json");
+    res.sendFile(path.join(__dirname, "journal.json"));
+  } else {
+    res.send("Permission Required");
   }
 });
 
