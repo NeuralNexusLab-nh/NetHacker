@@ -101,7 +101,7 @@ app.get("/ai", (req, res) => {
 app.post("/api", (req, res) => {
   if (req.headers["referer"].includes("nethacker.cloud")) {
     const q = req.body.data;
-    const ht = req.body.history;
+    const ht = JSON.stringify(req.body.history);
     ai(ht, q).then(data => {
       res.send(data);
     });
