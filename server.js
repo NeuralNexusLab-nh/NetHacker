@@ -86,6 +86,10 @@ app.get("/pw", (req, res) => {
   res.sendFile(path.join(__dirname, "pages", "pw.html"));
 });
 
+app.get("/ctf", (req, res) => {
+  res.download(path.join(__dirname, "ctf.exe"));
+});
+
 app.get("/journal/:key", (req, res) => {
   if (req.params.key == "0902") {
     res.sendFile(path.join(__dirname, "journal.json"));
