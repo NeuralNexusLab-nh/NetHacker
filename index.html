@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NetHacker — Cyber Intelligence & Penetration Testing</title>
+
+<!-- Content Security Policy -->
+<meta http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' https://nethacker.cloud 'unsafe-inline';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data:;
+        connect-src 'self' https://nethacker.cloud;
+        frame-ancestors 'none';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+      ">
+<meta http-equiv="X-Frame-Options" content="DENY">
+
+<link rel="icon" href="/cdn/favicon.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg-1:#000;
+  --bg-2:#050d15;
+  --neon-green:#00ff99;
+  --neon-blue:#00ccff;
+  --muted:#7fb3a6;
+  --panel:rgba(255,255,255,0.03);
+  --glass:rgba(255,255,255,0.04);
+  --txt:#cfeee3;
+  --radius:12px;
+  --max-w:1180px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Share Tech Mono", monospace;
+  color:var(--txt);
+  background:
+    radial-gradient(800px 400px at 10% 10%, rgba(0,30,20,0.35), transparent),
+    linear-gradient(180deg,var(--bg-1),var(--bg-2));
+  -webkit-font-smoothing:antialiased;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:24px;
+  padding:24px;
+}
+
+#matrix {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  filter: blur(0.8px) contrast(120%);
+}
+
+header {
+  width:100%;
+  max-width:var(--max-w);
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:18px 22px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(0,255,153,0.06);
+  box-shadow:0 8px 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+}
+
+.logo {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo img { width:64px;height:64px;border-radius:10px;border:1px solid rgba(0,255,153,0.12);box-shadow:0 0 18px rgba(0,255,153,0.08);background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));}
+header h1 { font-size:1.9rem; color:var(--neon-green); text-shadow:0 0 12px var(--neon-blue); letter-spacing:1px; }
+
+.header-meta { margin-left:auto; text-align:right; color:var(--muted); font-size:0.9rem; }
+.header-meta b { color:var(--neon-green); font-weight:700; }
+
+main {
+  width:100%;
+  max-width:var(--max-w);
+  z-index:2;
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+}
+@media (max-width:980px){ main { grid-template-columns:1fr; } }
+
+.panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(0,255,153,0.06);
+  border-radius: var(--radius);
+  padding:18px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+}
+
+.hero {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+  text-align:center;
+}
+
+.hero h2 { color:var(--neon-green); font-size:1.6rem; text-shadow:0 0 10px var(--neon-blue);}
+.hero p.subtitle { color:var(--muted); font-size:0.98rem; }
+
+.terminal {
+  margin-top:12px;
+  width:100%;
+  max-width:740px;
+  text-align:left;
+  background: rgba(0,0,0,0.6);
+  border:1px solid rgba(0,255,153,0.04);
+  padding:12px 14px;
+  border-radius:10px;
+  color: #aaffdd;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+  font-size:0.95rem;
+}
+.typed { display:inline-block; min-height:1.2em; white-space:pre-wrap; }
+.cursor { display:inline-block; width:10px; background:var(--neon-green); margin-left:6px; animation: blink 1s steps(2,start) infinite; vertical-align:bottom; }
+@keyframes blink {50%{opacity:0}}
+
+aside .panel { position:sticky; top:28px; }
+
+.links button {
+  width:100%;
+  display:block;
+  margin-bottom:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(0,255,153,0.08);
+  background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.55));
+  color:var(--neon-blue);
+  font-weight:700;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+  text-align:left;
+}
+.links button:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,255,153,0.06); }
+
+.contact a { color:var(--neon-blue); text-decoration: none; font-weight:700; }
+.contact a:hover { text-decoration: underline; }
+
+footer { width:100%; max-width:var(--max-w); text-align:center; color:var(--muted); font-size:0.9rem; z-index:2; padding:10px 8px; }
+
+@media (max-width:640px){ header h1 { font-size:1.4rem; } .logo img{ width:52px;height:52px; } }
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<header>
+  <div class="logo">
+    <h1>NetHacker</h1>
+  </div>
+  <div class="header-meta">
+    <div><b>NeuralNexusLab</b></div>
+    <div>Penetration Testing • Bug Research • Security Advisory</div>
+  </div>
+</header>
+
+<main>
+  <section class="panel hero">
+    <h2>The Best Penetration Testing & Bug Research Team</h2>
+    <p class="subtitle">We find vulnerabilities before adversaries do. Ethical, thorough, and transparent.</p>
+    <div class="terminal" aria-live="polite">
+      <div><strong>$</strong> <span id="typed" class="typed"></span><span class="cursor" aria-hidden="true"></span></div>
+      <div style="margin-top:10px; color:rgba(180,255,220,0.6); font-size:0.85rem;">
+        Quick facts: HackerOne profile • Public reports • Custom engagement scopes
+      </div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="panel">
+      <h3 style="color:var(--neon-blue); margin-bottom:10px;">About NetHacker</h3>
+      <p style="color:var(--muted); margin-bottom:12px;">
+        NetHacker (NeuralNexusLab) specializes in web application penetration testing, vulnerability research, and remediation guidance. We provide professional reports, POC validation, and consultancy.
+      </p>
+
+      <div class="links" style="margin-top:8px;">
+        <button onclick="window.open('https://hackerone.com/neuralnexuslab?type=user')">HackerOne Profile</button>
+        <button onclick="window.open('https://github.com/NeuralNexusLab-nh/')">GitHub</button>
+        <button onclick="window.open('https://www.youtube.com/@NeuralNexusLab-Nh')">YouTube</button>
+        <button onclick="window.open('https://www.instagram.com/NeuralNexusLab')">Instagram</button>
+        <button onclick="window.open('https://scratch.mit.edu/users/chatRBT/')">Scratch</button>
+      </div>
+
+      <hr style="border:none; border-top:1px solid rgba(0,255,153,0.03); margin:14px 0;">
+
+      <div class="contact">
+        <h4 style="color:var(--neon-green); margin-bottom:6px;">Contact</h4>
+        <p style="color:var(--muted); margin-bottom:8px;">
+          <a href="mailto:mail@nethacker.cloud">mail@nethacker.cloud</a><br>
+          <a href="mailto:neuralnexuslab@hotmail.com">neuralnexuslab@hotmail.com</a>
+        </p>
+        <p style="color:var(--muted); font-size:0.9rem;">
+          © 2025 NeuralNexusLab — NetHacker. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  Copyleft NeuralNexusLab | Built for the future of ethical hacking.
+</footer>
+
+<script>
+(function matrixInit(){
+  const canvas=document.getElementById('matrix');
+  const ctx=canvas.getContext('2d');
+  let w,h,cols,ypos;
+  function reset(){ w=canvas.width=innerWidth; h=canvas.height=innerHeight; cols=Math.floor(w/16)+1; ypos=Array(cols).fill(0); }
+  function matrixFrame(){
+    ctx.fillStyle='rgba(0,0,0,0.08)';
+    ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#00ff99';
+    ctx.font='12pt monospace';
+    for(let i=0;i<ypos.length;i++){
+      const text=String.fromCharCode(33+Math.random()*94);
+      ctx.fillText(text,i*16,ypos[i]*16);
+      if(ypos[i]*16>h&&Math.random()>0.975) ypos[i]=0;
+      ypos[i]++;
+    }
+    requestAnimationFrame(matrixFrame);
+  }
+  reset(); matrixFrame();
+  addEventListener('resize',reset);
+})();
+
+(function typing(){
+  const lines=[
+    'Fetching Command & Control server...',
+    'Loading modules: node.js, php, hacktool',
+    'Server connection SUCCESS...',
+    'TCP Server side ready for connection...'
+  ];
+  const el=document.getElementById('typed'); let li=0,pos=0;
+  function type(){
+    if(li>=lines.length){ li=0; setTimeout(()=>{el.textContent=''; pos=0;},2500); return setTimeout(type,2900);}
+    const cur=lines[li];
+    el.textContent=cur.slice(0,pos);
+    pos++;
+    if(pos<=cur.length){ setTimeout(type,50+Math.random()*80);} else{ li++; pos=0; setTimeout(type,900);}
+  }
+  setTimeout(type,800);
+})();
+</script>
+</body>
+</html>
