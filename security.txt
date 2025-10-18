@@ -1,0 +1,2 @@
+connect: security@nethacker.cloud
+thanks: /thanks.txt
