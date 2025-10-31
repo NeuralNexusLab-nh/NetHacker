@@ -103,6 +103,7 @@
   <div id="inputArea">
     <input id="input" type="text" placeholder="> type your message..." autofocus>
     <button id="sendBtn">SEND</button>
+    <button id="deleteBtn" style="background:#ff4444;border:none;padding:10px 20px;color:#000;font-weight:bold;border-radius:4px;cursor:pointer;">DELETE</button>
   </div>
 
   <script>
@@ -198,6 +199,13 @@
         aiMsg.textContent = `❌ [Network Error: ${err.message}]`;
       }
     }
+    const deleteBtn = document.getElementById("deleteBtn");
+    deleteBtn.addEventListener("click", () => {
+      localStorage.removeItem("chatHistory");
+      chatHistory = [];
+      terminal.innerHTML = "";
+      printMessage("System Booted...\nPowered By Google Gemini 2.0 Flash", "ai");
+    });
 
     sendBtn.addEventListener("click", sendMessage);
     input.addEventListener("keypress", e => {
