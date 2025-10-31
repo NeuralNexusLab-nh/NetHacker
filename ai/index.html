@@ -133,16 +133,22 @@
       return msg;
     }
 
-    async function typeMarkdown(element, markdownText, delay = 15) {
+    async function typeMarkdown(element, markdownText) {
       const html = marked.parse(markdownText);
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
       const text = tempDiv.textContent;
-
+    
       element.textContent = "";
-      for (let i = 0; i < text.length; i++) {
-        element.textContent += text[i];
+      let i = 0;
+      while (i < text.length) {
+        const chunkSize = Math.floor(Math.random() * 7) + 6;
+        const chunk = text.slice(i, i + chunkSize);
+        element.textContent += chunk;
+        i += chunkSize;
         terminal.scrollTop = terminal.scrollHeight;
+    
+        const delay = 500 + Math.random() * 500;
         await new Promise(r => setTimeout(r, delay));
       }
     }
