@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💀 Hacker AI Terminal 💀</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #00ff66;
+      font-family: "Courier New", monospace;
+      margin: 0;
+      padding: 20px;
+      overflow: hidden;
+    }
+    h1 {
+      color: #0f0;
+      text-shadow: 0 0 15px #0f0;
+      text-align: center;
+    }
+    #terminal {
+      width: 100%;
+      height: 70vh;
+      background: rgba(0, 20, 0, 0.85);
+      border: 2px solid #00ff66;
+      border-radius: 5px;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 0 0 20px #00ff66;
+    }
+    .msg {
+      margin: 10px 0;
+      white-space: pre-wrap;
+    }
+    .user {
+      color: #0ff;
+    }
+    .ai {
+      color: #00ff66;
+    }
+    #inputArea {
+      display: flex;
+      margin-top: 20px;
+    }
+    #input {
+      flex: 1;
+      background: black;
+      color: #0f0;
+      border: none;
+      border-bottom: 2px solid #0f0;
+      padding: 10px;
+      outline: none;
+      font-family: inherit;
+      font-size: 16px;
+    }
+    #sendBtn {
+      background: #0f0;
+      border: none;
+      padding: 10px 20px;
+      margin-left: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    #sendBtn:hover {
+      background: #00cc44;
+    }
+  </style>
+</head>
+<body>
+  <h1>H4CK3R A.I. T3RM1N4L</h1>
+  <div id="terminal"></div>
+  <div id="inputArea">
+    <input id="input" type="text" placeholder="> type your message..." autofocus>
+    <button id="sendBtn">SEND</button>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+
+    async function sendMessage() {
+      const userInput = input.value.trim();
+      if (!userInput) return;
+      printMessage('> ' + userInput, 'user');
+      input.value = '';
+      const response = await fetch('https://api.aimlapi.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer 505a3727a0e348b98f5d73c58921d733',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemma-3n-e4b-it',
+          messages: [
+            { role: 'user', content: userInput }
+          ]
+        }),
+      });
+
+      const data = await response.json();
+      const aiText = data?.choices?.[0]?.message?.content || '[Error: No response]';
+      printMessage(aiText, 'ai');
+    }
+
+    function printMessage(text, type) {
+      const msg = document.createElement('div');
+      msg.classList.add('msg', type);
+      msg.textContent = text;
+      terminal.appendChild(msg);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    printMessage('🟢 SYSTEM BOOTED...\n🧠 Connecting to AI mainframe...', 'ai');
+  </script>
+</body>
+</html>
