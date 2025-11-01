@@ -173,7 +173,7 @@
       saveChat("user", userText);
       input.value = "";
 
-      const aiMsg = printMessage("🤖 AI> thinking...", "ai");
+      const aiMsg = printMessage("Gemini 2.0 Flash> thinking...", "ai");
 
       try {
         const response = await fetch(
@@ -190,7 +190,7 @@
         const data = await response.json();
         const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[Error: No response, try to DELETE chat history.]";
 
-        aiMsg.innerHTML = "🤖 AI> <span class='typing'></span><span class='cursor'></span>";
+        aiMsg.innerHTML = "Gemini 2.0 Flash> <span class='typing'></span><span class='cursor'></span>";
         const typing = aiMsg.querySelector(".typing");
         const cursor = aiMsg.querySelector(".cursor");
 
