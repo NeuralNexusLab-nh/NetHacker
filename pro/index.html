@@ -188,7 +188,7 @@
         );
 
         const data = await response.json();
-        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[Error: No response]";
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[Error: No response, try to DELETE chat history.]";
 
         aiMsg.innerHTML = "🤖 AI> <span class='typing'></span><span class='cursor'></span>";
         const typing = aiMsg.querySelector(".typing");
