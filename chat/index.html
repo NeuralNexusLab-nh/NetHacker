@@ -117,7 +117,7 @@
 
     let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
-    printMessage("System Booted...\nPowered By AIML API (Gemma-3n)", "ai");
+    printMessage("System Booted...\nPowered By Gemma 3n (AIMLAPI)", "ai");
     chatHistory.forEach(msg => printMessage(msg.text, msg.role, true));
 
     function saveChat(role, text) {
@@ -152,8 +152,7 @@
         await new Promise(r => setTimeout(r, delay));
       }
     }
-
-    // 改為 AIML API
+    
     async function sendMessage() {
       const userInput = input.value.trim();
       if (!userInput) return;
@@ -200,7 +199,7 @@
       localStorage.removeItem("chatHistory");
       chatHistory = [];
       terminal.innerHTML = "";
-      printMessage("System Booted...\nPowered By AIML API (Gemma-3n)", "ai");
+      printMessage("System Booted...\nPowered By Gemma 3n (AIMLAPI)", "ai");
     });
 
     sendBtn.addEventListener("click", sendMessage);
