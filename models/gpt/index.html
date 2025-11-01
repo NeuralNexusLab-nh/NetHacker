@@ -121,13 +121,13 @@
       saveChat("user", userText);
       input.value = "";
 
-      const aiMsg = printMessage("🤖 AI> thinking...", "ai");
+      const aiMsg = printMessage("GPT5 Mini> thinking...", "ai");
 
       try {
         const messages = [
           {
             role: "system",
-            content: 'You are GPT-5 Mini by OpenAI. Answer helpfully, concisely, and correctly.'
+            content: 'You are GPT-5-Mini model and developed by OpenAI. Answer helpfully, concisely, and correctly.'
           },
           ...chatHistory.slice(-4).map(h => ({
             role: h.role === "ai" ? "assistant" : "user",
@@ -155,7 +155,7 @@
         const reply = data?.choices?.[0]?.message?.content?.trim() ||
                       "[Error: API did not return content.]";
 
-        aiMsg.textContent = "🤖 AI> " + reply;
+        aiMsg.textContent = "GPT5 Mini> " + reply;
         saveChat("ai", reply);
 
       } catch (err) {
