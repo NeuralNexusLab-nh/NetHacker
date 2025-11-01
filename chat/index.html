@@ -4,26 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hacker AI Terminal</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
       background-color: #000;
-      color: #00ff66;
+      color: #00ff88;
       font-family: "Courier New", monospace;
       margin: 0;
       padding: 20px;
-      overflow: hidden;
     }
     h1 {
-      color: #0f0;
-      text-shadow: 0 0 15px #0f0;
       text-align: center;
+      color: #00ff66;
+      text-shadow: 0 0 15px #00ff66;
+      letter-spacing: 2px;
     }
     #terminal {
       width: 100%;
       height: 70vh;
-      background: rgba(0, 20, 0, 0.85);
-      border: 2px solid #00ff66;
-      border-radius: 5px;
+      background: rgba(0, 25, 0, 0.9);
+      border: 2px solid #00ff88;
+      border-radius: 6px;
       padding: 15px;
       overflow-y: auto;
       box-shadow: 0 0 20px #00ff66;
@@ -32,47 +33,76 @@
       margin: 10px 0;
       white-space: pre-wrap;
     }
-    .user {
-      color: #0ff;
-    }
-    .ai {
-      color: #00ff66;
-    }
+    .user { color: #00ccff; }
+    .ai { color: #00ff88; }
     #inputArea {
       display: flex;
       margin-top: 20px;
+      gap: 10px;
     }
     #input {
       flex: 1;
-      background: black;
+      background: #000;
       color: #0f0;
       border: none;
-      border-bottom: 2px solid #0f0;
+      border-bottom: 2px solid #00ff88;
       padding: 10px;
-      outline: none;
       font-family: inherit;
       font-size: 16px;
+      outline: none;
     }
     #sendBtn {
-      background: #0f0;
+      background: #00ff88;
       border: none;
       padding: 10px 20px;
-      margin-left: 10px;
-      font-weight: bold;
       cursor: pointer;
+      font-weight: bold;
+      color: #000;
       transition: 0.2s;
+      border-radius: 4px;
     }
-    #sendBtn:hover {
-      background: #00cc44;
+    #sendBtn:hover { background: #00cc66; }
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1em;
+      background: #00ff88;
+      animation: blink 1s steps(2, start) infinite;
+      vertical-align: bottom;
+      margin-left: 3px;
+    }
+    @keyframes blink { to { opacity: 0; } }
+    .ai h1, .ai h2, .ai h3, .ai strong, .ai code {
+      color: #00ff88;
+    }
+    .ai code {
+      background: #001a00;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .ai pre code {
+      display: block;
+      background: #001a00;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .ai a {
+      color: #00ffcc;
+      text-decoration: none;
+    }
+    .ai a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>H4CK3R A.I. T3RM1N4L</h1>
+  <h1>🧠 H4CK3R A.I. T3RM1N4L ⚡</h1>
   <div id="terminal"></div>
   <div id="inputArea">
     <input id="input" type="text" placeholder="> type your message..." autofocus>
     <button id="sendBtn">SEND</button>
+    <button id="deleteBtn" style="background:#ff4444;border:none;padding:10px 20px;color:#000;font-weight:bold;border-radius:4px;cursor:pointer;">DELETE</button>
   </div>
 
   <script>
@@ -80,44 +110,98 @@
     const input = document.getElementById('input');
     const sendBtn = document.getElementById('sendBtn');
 
+    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+
+    printMessage("System Booted...\nPowered By AIML API (Gemma-3n)", "ai");
+    chatHistory.forEach(msg => printMessage(msg.text, msg.role, true));
+
+    function saveChat(role, text) {
+      chatHistory.push({ role, text });
+      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    }
+
+    function printMessage(text, cls, useMarkdown = false) {
+      const msg = document.createElement('div');
+      msg.classList.add('msg', cls);
+      msg.innerHTML = useMarkdown ? marked.parse(text) : text;
+      terminal.appendChild(msg);
+      terminal.scrollTop = terminal.scrollHeight;
+      return msg;
+    }
+
+    async function typeMarkdown(element, markdownText) {
+      const html = marked.parse(markdownText);
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const text = tempDiv.textContent;
+
+      element.textContent = "";
+      let i = 0;
+      while (i < text.length) {
+        const chunkSize = Math.floor(Math.random() * 50) + 25;
+        const chunk = text.slice(i, i + chunkSize);
+        element.textContent += chunk;
+        i += chunkSize;
+        terminal.scrollTop = terminal.scrollHeight;
+        const delay = 10 + Math.random() * 100;
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+
+    // 改為 AIML API
     async function sendMessage() {
       const userInput = input.value.trim();
       if (!userInput) return;
+
       printMessage('> ' + userInput, 'user');
+      saveChat('user', userInput);
       input.value = '';
-      const response = await fetch('https://api.aimlapi.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer 505a3727a0e348b98f5d73c58921d733',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemma-3n-e4b-it',
-          messages: [
-            { role: 'user', content: userInput }
-          ]
-        }),
-      });
 
-      const data = await response.json();
-      const aiText = data?.choices?.[0]?.message?.content || '[Error: No response]';
-      printMessage(aiText, 'ai');
+      const aiMsg = printMessage("🤖 AI> thinking...", "ai");
+
+      try {
+        const response = await fetch('https://api.aimlapi.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer 505a3727a0e348b98f5d73c58921d733',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'google/gemma-3n-e4b-it',
+            messages: [{ role: 'user', content: userInput }]
+          }),
+        });
+
+        const data = await response.json();
+        const aiText = data?.choices?.[0]?.message?.content || '[Error: No response]';
+
+        aiMsg.innerHTML = "🤖 AI> <span class='typing'></span><span class='cursor'></span>";
+        const typing = aiMsg.querySelector(".typing");
+        const cursor = aiMsg.querySelector(".cursor");
+
+        await typeMarkdown(typing, aiText, 20);
+        cursor.remove();
+
+        aiMsg.innerHTML = "🤖 AI> " + marked.parse(aiText);
+        saveChat("ai", aiText);
+
+      } catch (err) {
+        aiMsg.textContent = `❌ [Network Error: ${err.message}]`;
+      }
     }
 
-    function printMessage(text, type) {
-      const msg = document.createElement('div');
-      msg.classList.add('msg', type);
-      msg.textContent = text;
-      terminal.appendChild(msg);
-      terminal.scrollTop = terminal.scrollHeight;
-    }
-
-    sendBtn.addEventListener('click', sendMessage);
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
+    const deleteBtn = document.getElementById("deleteBtn");
+    deleteBtn.addEventListener("click", () => {
+      localStorage.removeItem("chatHistory");
+      chatHistory = [];
+      terminal.innerHTML = "";
+      printMessage("System Booted...\nPowered By AIML API (Gemma-3n)", "ai");
     });
 
-    printMessage('System Booted\nPowered By Gemma 3n Model', 'ai');
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
   </script>
 </body>
 </html>
