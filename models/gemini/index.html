@@ -197,7 +197,7 @@
         await typeMarkdown(typing, reply, 20);
         cursor.remove();
 
-        aiMsg.innerHTML = "🤖 AI> " + marked.parse(reply);
+        aiMsg.innerHTML = "Gemini 2.0 Flash> " + marked.parse(reply);
         saveChat("ai", reply);
 
       } catch (err) {
