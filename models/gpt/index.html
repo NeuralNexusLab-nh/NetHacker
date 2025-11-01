@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GPT-4.1 Mini Playground</title>
+  <title>GPT-5 Mini Playground</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
@@ -75,7 +75,7 @@
   </style>
 </head>
 <body>
-  <h1>⚡ GPT-4.1 Mini Playground [Professional]</h1>
+  <h1>⚡ GPT-5 Mini Playground [Professional]</h1>
   <div id="terminal"></div>
   <div id="inputArea">
     <input id="input" type="text" placeholder="> type your message..." autofocus>
@@ -84,9 +84,10 @@
   </div>
 
   <script>
-    const API_KEY = "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";
-    const MODEL = "openai/gpt-4.1-mini";
-    const API_URL = "https://models.github.ai/inference/chat/completions";
+    // === API 設定 ===
+    const API_KEY = "sk-qHB3zu2dSrGBApqFidwf3Xbk1tnhOI7MrHeAGfkX9RprepB5";
+    const MODEL = "gpt-5-mini";
+    const API_URL = "https://api.chatanywhere.org/v1/chat/completions";
 
     const terminal = document.getElementById('terminal');
     const input = document.getElementById('input');
@@ -95,8 +96,7 @@
 
     let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
-    printMessage("System Booted...\nConnected to GPT-4.1 Mini (GitHub Models)\nRate Limits: RPM 15, RPD 150.", "ai");
-
+    printMessage("System Booted...\nConnected to GPT-5 Mini (ChatAnywhere)\nRate Limit: 200 requests/day.", "ai");
     chatHistory.forEach(msg => printMessage(msg.text, msg.role, true));
 
     function saveChat(role, text) {
@@ -127,16 +127,13 @@
         const messages = [
           {
             role: "system",
-            content: 'You are the model named "GPT-4.1 mini," developed by OpenAI. You are helpful, concise, and always grammatically correct.'
+            content: 'You are GPT-5 Mini by OpenAI. Answer helpfully, concisely, and correctly.'
           },
           ...chatHistory.slice(-4).map(h => ({
             role: h.role === "ai" ? "assistant" : "user",
             content: h.text
           })),
-          {
-            role: "user",
-            content: userText
-          }
+          { role: "user", content: userText }
         ];
 
         const response = await fetch(API_URL, {
@@ -147,7 +144,7 @@
           },
           body: JSON.stringify({
             model: MODEL,
-            messages,
+            messages: messages,
             temperature: 1,
             top_p: 1
           })
@@ -155,7 +152,8 @@
 
         const data = await response.json();
 
-        const reply = data?.choices?.[0]?.message?.content?.trim() || "[Error: You have reached the GPT rate limit. Please try again later.]";
+        const reply = data?.choices?.[0]?.message?.content?.trim() ||
+                      "[Error: API did not return content.]";
 
         aiMsg.textContent = "🤖 AI> " + reply;
         saveChat("ai", reply);
@@ -169,7 +167,7 @@
       localStorage.removeItem("chatHistory");
       chatHistory = [];
       terminal.innerHTML = "";
-      printMessage("System Booted...\nConnected to GPT-4.1 Mini (GitHub Models)\nRate Limits: RPM 15, RPD 150.", "ai");
+      printMessage("System Booted...\nConnected to GPT-5 Mini (ChatAnywhere)\nRate Limit: 200 requests/day.", "ai");
     });
 
     sendBtn.addEventListener("click", sendMessage);
