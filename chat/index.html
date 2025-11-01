@@ -177,7 +177,7 @@
         });
 
         const data = await response.json();
-        const aiText = data?.choices?.[0]?.message?.content || '[Error: No response]';
+        const aiText = data?.choices?.[0]?.message?.content || '[Error: No response, try to DELETE chat history.]';
 
         aiMsg.innerHTML = "🤖 AI> <span class='typing'></span><span class='cursor'></span>";
         const typing = aiMsg.querySelector(".typing");
