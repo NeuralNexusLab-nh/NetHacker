@@ -147,14 +147,6 @@
 
       try {
         const messages = [
-          {
-            role: "system",
-            content: 'You are GPT-4o-Mini model and developed by OpenAI. Answer helpfully, concisely, and correctly.'
-          },
-          ...chatHistory.slice(-4).map(h => ({
-            role: h.role === "ai" ? "assistant" : "user",
-            content: h.text
-          })),
           { role: "user", content: userText }
         ];
 
