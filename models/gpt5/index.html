@@ -112,6 +112,29 @@
       return msg;
     }
 
+    async function typeText(element, fullText) {
+      element.textContent = "GPT5 Mini> ";
+      const cursor = document.createElement("span");
+      cursor.classList.add("cursor");
+      element.appendChild(cursor);
+
+      let index = 0;
+      while (index < fullText.length) {
+        const chunkSize = Math.floor(Math.random() * 11) + 20; 
+        const nextChunk = fullText.slice(index, index + chunkSize);
+        index += chunkSize;
+
+        element.textContent = "GPT5 Mini> " + fullText.slice(0, index);
+        element.appendChild(cursor);
+        terminal.scrollTop = terminal.scrollHeight;
+
+        const delay = Math.random() * 100 + 100;
+        await new Promise(res => setTimeout(res, delay));
+      }
+
+      cursor.remove(); 
+    }
+
     async function sendMessage() {
       const userText = input.value.trim();
       if (!userText) return;
@@ -154,7 +177,8 @@
         const reply = data?.choices?.[0]?.message?.content?.trim() ||
                       "[Error: API did not return content.]";
 
-        aiMsg.textContent = "GPT5 Mini> " + reply;
+        aiMsg.textContent = "";
+        await typeText(aiMsg, reply); 
         saveChat("ai", reply);
 
       } catch (err) {
