@@ -115,14 +115,14 @@
     const input = document.getElementById('input');
     const sendBtn = document.getElementById('sendBtn');
 
-    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    let chatHistory = JSON.parse(localStorage.getItem("Gemma3-chatLog")) || [];
 
     printMessage("System Booted...\nPowered By Gemma 3n (AIMLAPI)", "ai");
     chatHistory.forEach(msg => printMessage(msg.text, msg.role, true));
 
     function saveChat(role, text) {
       chatHistory.push({ role, text });
-      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+      localStorage.setItem("Gemma3-chatLogf", JSON.stringify(chatHistory));
     }
 
     function printMessage(text, cls, useMarkdown = false) {
@@ -196,7 +196,7 @@
 
     const deleteBtn = document.getElementById("deleteBtn");
     deleteBtn.addEventListener("click", () => {
-      localStorage.removeItem("chatHistory");
+      localStorage.removeItem("Gemma3-chatLog");
       chatHistory = [];
       terminal.innerHTML = "";
       printMessage("System Booted...\nPowered By Gemma 3n (AIMLAPI)", "ai");
