@@ -93,14 +93,14 @@
     const sendBtn = document.getElementById('sendBtn');
     const deleteBtn = document.getElementById('deleteBtn');
 
-    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    let chatHistory = JSON.parse(localStorage.getItem("GPT4o-chatLog")) || [];
 
     printMessage("System Booted...\nConnected to GPT-4o Mini (free.v36.cm 云歌)\nRate Limit: 96 requests/minute.", "ai");
     chatHistory.forEach(msg => printMessage(msg.text, msg.role, true));
 
     function saveChat(role, text) {
       chatHistory.push({ role, text });
-      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+      localStorage.setItem("GPT4o-chatLog", JSON.stringify(chatHistory));
     }
 
     function printMessage(text, cls) {
@@ -186,7 +186,7 @@
     }
 
     deleteBtn.addEventListener("click", () => {
-      localStorage.removeItem("chatHistory");
+      localStorage.removeItem("GPT4o-chatLog");
       chatHistory = [];
       terminal.innerHTML = "";
       printMessage("System Booted...\nConnected to GPT-4o Mini (free.v36.cm 云歌)\nRate Limit: 96 requests/minute.", "ai");
