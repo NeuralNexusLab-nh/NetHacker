@@ -127,7 +127,7 @@
 
     function saveChat(role, text) {
       chatHistory.push({ role, text });
-      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+      localStorage.setItem("Gemini-chatLog", JSON.stringify(chatHistory));
     }
 
     function printMessage(text, cls, useMarkdown = false) {
@@ -206,7 +206,7 @@
     }
     const deleteBtn = document.getElementById("deleteBtn");
     deleteBtn.addEventListener("click", () => {
-      localStorage.removeItem("chatHistory");
+      localStorage.removeItem("Gemini-chatLog");
       chatHistory = [];
       terminal.innerHTML = "";
       printMessage("System Booted...\nPowered By Google Gemini 2.0 Flash", "ai");
