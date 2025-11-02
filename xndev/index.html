@@ -1,1 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>XnDev AI Playground</title>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+@keyframes gradient {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+@keyframes blink {50%{opacity:0;}}
+@keyframes glitch {
+  0%{text-shadow:2px 0 red,-2px 0 cyan;}
+  20%{text-shadow:-2px 0 red,2px 0 cyan;}
+  40%{text-shadow:2px 2px red,-2px -2px cyan;}
+  60%{text-shadow:-2px -2px red,2px 2px cyan;}
+  80%{text-shadow:2px 0 red,-2px 0 cyan;}
+  100%{text-shadow:none;}
+}
+body{
+  margin:0;
+  height:100vh;
+  font-family:"Consolas",monospace;
+  color:#ff4444;
+  background:linear-gradient(-45deg,#000,#200000,#300000,#000);
+  background-size:400% 400%;
+  animation:gradient 10s ease infinite;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+header{
+  text-align:center;
+  padding:20px;
+  font-size:1.6em;
+  border-bottom:1px solid #ff4444;
+  animation:glitch 1.5s infinite;
+}
+#chat-container{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:20px;
+  overflow-y:auto;
+}
+.message{
+  max-width:80%;
+  margin:10px 0;
+  padding:10px 15px;
+  border-radius:10px;
+  line-height:1.5;
+  word-break:break-word;
+}
+.user{align-self:flex-end;background-color:#220000;border:1px solid #ff4444;}
+.ai{align-self:flex-start;background-color:#111;border:1px solid #ff4444;}
+#input-area{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:15px;
+  border-top:1px solid #ff4444;
+  background-color:#000;
+  gap:10px;
+}
+#model-select,#clear-btn{
+  background-color:#111;
+  color:#ff4444;
+  border:1px solid #ff4444;
+  border-radius:6px;
+  padding:6px;
+}
+#user-input{
+  flex:1;
+  background-color:#111;
+  color:#ff4444;
+  border:1px solid #ff4444;
+  border-radius:10px;
+  padding:10px;
+  resize:none;
+  height:60px;
+  font-family:"Consolas",monospace;
+}
+#send-btn{
+  width:45px;
+  height:45px;
+  border-radius:50%;
+  border:none;
+  background-color:#ff4444;
+  color:#000;
+  font-size:20px;
+  cursor:pointer;
+  transition:0.2s;
+}
+#send-btn:hover{background-color:#ff6666;}
+#intro{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-color:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:2em;
+  z-index:9999;
+  color:#ff4444;
+  flex-direction:column;
+}
+#intro-text{
+  border-right:2px solid #ff4444;
+  animation:blink 0.8s infinite;
+}
+</style>
+</head>
+<body>
+<div id="intro"><div id="intro-text"></div></div>
+<header>XnDev AI Playground</header>
+<div id="chat-container"></div>
+<div id="input-area">
+  <select id="model-select">
+    <option value="gpt-5">GPT-5</option>
+    <option value="gpt-5-nano">GPT-5 Nano</option>
+    <option value="gpt-5-mini">GPT-5 Mini</option>
+    <option value="gpt-5-chat-latest">GPT-5 Chat Latest</option>
+    <option value="deepseek-chat">DeepSeek V3.1</option>
+    <option value="deepseek-reasoner">DeepSeek R1</option>
+    <option value="google/gemini-2.0-flash-lite-001">Gemini 2.0 Flash</option>
+    <option value="google/gemma-3-12b-it:free">Gemma 3</option>
+    <option value="meta-llama/llama-4-maverick">Llama Maverick</option>
+    <option value="meta-llama/llama-3-8b-instruct">Llama Instruct</option>
+  </select>
+  <textarea id="user-input" placeholder="Type prompt here..."></textarea>
+  <button id="send-btn">↑</button>
+  <button id="clear-btn">✖</button>
+</div>
+<script>
+const chatContainer=document.getElementById("chat-container");
+const userInput=document.getElementById("user-input");
+const sendBtn=document.getElementById("send-btn");
+const modelSelect=document.getElementById("model-select");
+const clearBtn=document.getElementById("clear-btn");
+const intro=document.getElementById("intro");
+const introText=document.getElementById("intro-text");
+const STORAGE_KEY="xndev_ai_chat_history";
+
+function loadChatHistory(){
+  const history=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
+  history.forEach(msg=>appendMessage(msg.text,msg.sender,false));
+}
+function saveChatHistory(){
+  const messages=Array.from(document.querySelectorAll(".message")).map(el=>({
+    text:el.textContent,
+    sender:el.classList.contains("user")?"user":"ai"
+  }));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(messages));
+}
+function getChatHistoryString(){
+  const history=JSON.parse(localStorage.getItem(STORAGE_KEY))||[];
+  return history.map(h=>`${h.sender.toUpperCase()}: ${h.text}`).join(" | ");
+}
+function appendMessage(text,sender,save=true){
+  const msg=document.createElement("div");
+  msg.classList.add("message",sender);
+  msg.textContent=text;
+  chatContainer.appendChild(msg);
+  chatContainer.scrollTo({top:chatContainer.scrollHeight,behavior:"smooth"});
+  if(save)saveChatHistory();
+}
+async function sendMessage(){
+  const prompt=userInput.value.trim();
+  const model=modelSelect.value;
+  if(!prompt)return;
+  appendMessage(prompt,"user");
+  userInput.value="";
+  const historyContext=getChatHistoryString();
+  const fullPrompt=`${prompt} (this is chat history:: ${historyContext})`;
+  if(!puter||!puter.ai){
+    appendMessage("⚠️ puter.ai import failed","ai");
+    return;
+  }
+  try{
+    const res=await puter.ai.chat(fullPrompt,{model});
+    let reply=res||"[No response]";
+    appendMessage(reply,"ai");
+  }catch(err){
+    appendMessage("⚠️ Error: "+err.message,"ai");
+  }
+}
+sendBtn.addEventListener("click",sendMessage);
+userInput.addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+clearBtn.addEventListener("click",()=>{
+  localStorage.removeItem(STORAGE_KEY);
+  chatContainer.innerHTML="";
+});
+function playIntro(){
+  const text="XnDev System Booting...";
+  let i=0;
+  const interval=setInterval(()=>{
+    introText.textContent=text.slice(0,i++);
+    if(i>text.length){
+      clearInterval(interval);
+      setTimeout(()=>{
+        intro.style.transition="opacity 1s";
+        intro.style.opacity=0;
+        setTimeout(()=>intro.remove(),1000);
+        loadChatHistory();
+      },600);
+    }
+  },100);
+}
+window.addEventListener("load",playIntro);
+</script>
+</body>
+</html>
 
