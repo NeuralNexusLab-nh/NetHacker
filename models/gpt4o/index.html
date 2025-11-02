@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPT-4o Mini Playground</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      background-color: #000;
+      color: #00ff88;
+      font-family: "Courier New", monospace;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #00ff66;
+      text-shadow: 0 0 15px #00ff66;
+      letter-spacing: 2px;
+    }
+    #terminal {
+      width: 100%;
+      height: 70vh;
+      background: rgba(0, 25, 0, 0.9);
+      border: 2px solid #00ff88;
+      border-radius: 6px;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 0 0 20px #00ff66;
+    }
+    .msg {
+      margin: 10px 0;
+      white-space: pre-wrap;
+    }
+    .user { color: #00ccff; }
+    .ai { color: #00ff88; }
+    #inputArea {
+      display: flex;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    #input {
+      flex: 1;
+      background: #000;
+      color: #0f0;
+      border: none;
+      border-bottom: 2px solid #00ff88;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 16px;
+      outline: none;
+    }
+    #sendBtn {
+      background: #00ff88;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #000;
+      transition: 0.2s;
+      border-radius: 4px;
+    }
+    #sendBtn:hover { background: #00cc66; }
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1em;
+      background: #00ff88;
+      animation: blink 1s steps(2, start) infinite;
+      vertical-align: bottom;
+      margin-left: 3px;
+    }
+    @keyframes blink { to { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <h1>⚡ GPT-4o Mini Playground [Wise]</h1>
+  <div id="terminal"></div>
+  <div id="inputArea">
+    <input id="input" type="text" placeholder="> type your message..." autofocus>
+    <button id="sendBtn">SEND</button>
+    <button id="deleteBtn" style="background:#ff4444;border:none;padding:10px 20px;color:#000;font-weight:bold;border-radius:4px;cursor:pointer;">DELETE</button>
+  </div>
+
+  <script>
+    const API_KEY = atob("c2stenhmWGZwMUZzYnBCSVFGVkEwRjBENzgxQzlBMTRkOGJCYkVkMDUxY0U2QmMyNkZm");
+    const MODEL = "gpt-4o-mini";
+    const API_URL = "https://free.v36.cm/v1/";
+
+    const terminal = document.getElementById('terminal');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+
+    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+
+    printMessage("System Booted...\nConnected to GPT-4o Mini (free.v36.cm 云歌)\nRate Limit: 96 requests/minute.", "ai");
+    chatHistory.forEach(msg => printMessage(msg.text, msg.role, true));
+
+    function saveChat(role, text) {
+      chatHistory.push({ role, text });
+      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    }
+
+    function printMessage(text, cls) {
+      const msg = document.createElement('div');
+      msg.classList.add('msg', cls);
+      msg.textContent = text;
+      terminal.appendChild(msg);
+      terminal.scrollTop = terminal.scrollHeight;
+      return msg;
+    }
+
+    async function typeText(element, fullText) {
+      element.textContent = "GPT4o Mini> ";
+      const cursor = document.createElement("span");
+      cursor.classList.add("cursor");
+      element.appendChild(cursor);
+
+      let index = 0;
+      while (index < fullText.length) {
+        const chunkSize = Math.floor(Math.random() * 11) + 20; 
+        const nextChunk = fullText.slice(index, index + chunkSize);
+        index += chunkSize;
+
+        element.textContent = "GPT4o Mini> " + fullText.slice(0, index);
+        element.appendChild(cursor);
+        terminal.scrollTop = terminal.scrollHeight;
+
+        const delay = Math.random() * 100 + 100;
+        await new Promise(res => setTimeout(res, delay));
+      }
+
+      cursor.remove();
+    }
+
+    async function sendMessage() {
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      printMessage("👤 USER> " + userText, "user");
+      saveChat("user", userText);
+      input.value = "";
+
+      const aiMsg = printMessage("GPT4o Mini> thinking...", "ai");
+
+      try {
+        const messages = [
+          {
+            role: "system",
+            content: 'You are GPT-4o-Mini model and developed by OpenAI. Answer helpfully, concisely, and correctly.'
+          },
+          ...chatHistory.slice(-4).map(h => ({
+            role: h.role === "ai" ? "assistant" : "user",
+            content: h.text
+          })),
+          { role: "user", content: userText }
+        ];
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-foo": "true",
+            "Authorization": `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: messages
+          })
+        });
+
+        const data = await response.json();
+
+        const reply = data?.choices?.[0]?.message?.content?.trim() ||
+                      "[Error: API did not return content.]";
+
+        aiMsg.textContent = "";
+        await typeText(aiMsg, reply); 
+        saveChat("ai", reply);
+
+      } catch (err) {
+        aiMsg.textContent = `❌ [Network Error: ${err.message}]`;
+      }
+    }
+
+    deleteBtn.addEventListener("click", () => {
+      localStorage.removeItem("chatHistory");
+      chatHistory = [];
+      terminal.innerHTML = "";
+      printMessage("System Booted...\nConnected to GPT-4o Mini (free.v36.cm 云歌)\nRate Limit: 96 requests/minute.", "ai");
+    });
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
