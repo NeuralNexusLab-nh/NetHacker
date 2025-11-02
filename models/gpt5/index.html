@@ -93,14 +93,14 @@
     const sendBtn = document.getElementById('sendBtn');
     const deleteBtn = document.getElementById('deleteBtn');
 
-    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    let chatHistory = JSON.parse(localStorage.getItem("GPT5-chatLog")) || [];
 
     printMessage("System Booted...\nConnected to GPT-5 Mini (ChatAnywhere)\nRate Limit: 200 requests/day.", "ai");
     chatHistory.forEach(msg => printMessage(msg.text, msg.role, true));
 
     function saveChat(role, text) {
       chatHistory.push({ role, text });
-      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+      localStorage.setItem("GPT5-chatLog", JSON.stringify(chatHistory));
     }
 
     function printMessage(text, cls) {
@@ -187,7 +187,7 @@
     }
 
     deleteBtn.addEventListener("click", () => {
-      localStorage.removeItem("chatHistory");
+      localStorage.removeItem("GPT5-chatLog");
       chatHistory = [];
       terminal.innerHTML = "";
       printMessage("System Booted...\nConnected to GPT-5 Mini (ChatAnywhere)\nRate Limit: 200 requests/day.", "ai");
