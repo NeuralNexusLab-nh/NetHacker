@@ -11,7 +11,7 @@
             document.body.innerHTML = "Please add your image prompt in this URL's after '#' such as <a href='https://nethacker.cloud/projects/dalle3#A picture about a cat.' target='_blank'>this</a>";
         }
         if (text != "no") {
-            puter.ai.txt2img(text, true).then((image)=>{
+            puter.ai.txt2img(text, false).then((image)=>{
                 document.body.innerHTML = "";
                 document.body.appendChild(image);
             });
