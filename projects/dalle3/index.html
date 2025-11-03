@@ -1,21 +1,163 @@
 <!doctype html>
-<html>
-<body>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>⚡ Cyber DALL·E 3 Generator ⚡</title>
     <script src="https://js.puter.com/v2/"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #00ff00;
+            font-family: "Courier New", monospace;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #00ff99;
+            text-shadow: 0 0 10px #00ff99;
+        }
+
+        .container {
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 700px;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 30px #00ff00;
+        }
+
+        input, button {
+            background: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            margin: 5px;
+            font-family: inherit;
+        }
+
+        input:focus, button:hover {
+            box-shadow: 0 0 10px #00ff00;
+            outline: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            color: #0f0;
+            font-size: 14px;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 90%;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #009900;
+        }
+    </style>
+</head>
+<body>
+    <h1>DALL·E 3 Image Generator</h1>
+
+    <div class="container">
+        <div>
+            <label>🎨 Prompt:</label><br>
+            <input type="text" id="prompt" size="50" placeholder="Type your image prompt...">
+        </div>
+
+        <div>
+            <label>📏 Image Size (px):</label><br>
+            <input type="number" id="px" value="512" min="128" max="2048">
+        </div>
+
+        <div>
+            <button id="generateBtn">⚡ CREATE IMAGE ⚡</button>
+            <button id="downloadBtn" disabled>💾 DOWNLOAD</button>
+            <button id="clearBtn">🧨 CLEAR</button>
+        </div>
+
+        <div class="status" id="statusText">Awaiting command...</div>
+        <div id="imageContainer"></div>
+    </div>
+
+    <div class="footer">[ Cyber DALL·E 3 | Built with Puter.js ]</div>
+
     <script>
-        if (window.location.hash) {
-            var text = window.location.hash.substring(1);
-            document.body.innerHTML = "Loding DALL.E 3 Image Generation... (Puter.js)";
-        } else {
-            var text = "no";
-            document.body.innerHTML = "Please add your image prompt in this URL's after '#' such as <a href='https://nethacker.cloud/projects/dalle3#A picture about a cat.' target='_blank'>this</a>";
+        const params = new URLSearchParams(window.location.search);
+        const promptInput = document.getElementById('prompt');
+        const pxInput = document.getElementById('px');
+        const statusText = document.getElementById('statusText');
+        const imageContainer = document.getElementById('imageContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        if (params.has('prompt')) {
+            promptInput.value = decodeURIComponent(params.get('prompt'));
         }
-        if (text != "no") {
-            puter.ai.txt2img(text, false).then((image)=>{
-                document.body.innerHTML = "";
-                document.body.appendChild(image);
-            });
+
+        let generatedImage = null;
+
+        async function generateImage() {
+            const text = promptInput.value.trim();
+            const px = parseInt(pxInput.value) || 512;
+            if (!text) {
+                alert("Enter a prompt first, hacker!");
+                return;
+            }
+
+            statusText.innerHTML = "⚙️ Generating image... please wait <span class='blink'>_</span>";
+            imageContainer.innerHTML = "";
+            downloadBtn.disabled = true;
+
+            try {
+                const image = await puter.ai.txt2img(text, false, { size: px });
+                generatedImage = image;
+                imageContainer.innerHTML = "";
+                imageContainer.appendChild(image);
+                statusText.textContent = "✅ Image generated successfully!";
+                downloadBtn.disabled = false;
+            } catch (err) {
+                statusText.textContent = "❌ Error: " + err.message;
+            }
         }
+
+        function downloadImage() {
+            if (!generatedImage) return;
+            const link = document.createElement('a');
+            link.href = generatedImage.src;
+            link.download = 'dalle3_image.png';
+            link.click();
+        }
+
+        function clearAll() {
+            promptInput.value = "";
+            imageContainer.innerHTML = "";
+            statusText.textContent = "🧨 Cleared.";
+            downloadBtn.disabled = true;
+        }
+
+        generateBtn.onclick = generateImage;
+        downloadBtn.onclick = downloadImage;
+        clearBtn.onclick = clearAll;
+
+        promptInput.addEventListener('change', () => {
+            const newURL = `${window.location.origin}${window.location.pathname}?prompt=${encodeURIComponent(promptInput.value)}`;
+            window.history.replaceState(null, '', newURL);
+        });
     </script>
 </body>
 </html>
