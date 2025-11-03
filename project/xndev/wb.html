@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>XnDev Website Builder — Puter.js</title>
+  <script src="https://js.puter.com/v2/"></script>
+  <style>
+    /* Hacker / terminal aesthetic */
+    :root{
+      --bg:#0b0f12;
+      --panel:#071018;
+      --accent:#00ff88;
+      --muted:#6fb1a6;
+      --glass: rgba(255,255,255,0.03);
+      --mono: "Source Code Pro", "Courier New", monospace;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#07101a 0%, #041018 100%);font-family:Inter, system-ui, -apple-system, Roboto, sans-serif;color:#cfece0}
+    .app{
+      display:grid;
+      grid-template-columns:300px 1fr;
+      gap:12px;
+      height:100vh;
+      padding:18px;
+      box-sizing:border-box;
+    }
+    header{
+      grid-column:1 / -1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:4px;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo{
+      width:52px;height:52px;border-radius:8px;background:linear-gradient(135deg,#002b1e,#003a2a);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;color:var(--accent);box-shadow:0 6px 18px rgba(0,0,0,0.6);
+    }
+    h1{font-size:16px;margin:0}
+    .sub{font-size:12px;color:var(--muted)}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
+      color:var(--accent); padding:8px 12px;border-radius:8px;font-weight:600;cursor:pointer;font-family:var(--mono);
+    }
+    button.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.03);color:var(--muted)}
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      border:1px solid rgba(255,255,255,0.03);
+      border-radius:10px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6)
+    }
+
+    /* Left sidebar */
+    .sidebar{display:flex;flex-direction:column;gap:12px}
+    .project-info{font-family:var(--mono);font-size:12px;color:var(--muted)}
+    .files{overflow:auto;height:calc(100vh - 170px);padding-right:6px}
+    .file-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:6px;color:#bfe7d6;cursor:pointer}
+    .file-item:hover{background:rgba(0,255,136,0.03)}
+    .file-item.active{background:rgba(0,255,136,0.05);color:var(--accent)}
+    .file-name{font-family:var(--mono);font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+
+    /* Editor */
+    .editor-area{display:flex;flex-direction:column;height:calc(100vh - 120px)}
+    .editor-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .editor{
+      flex:1;
+      background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.45));
+      border-radius:8px;padding:12px;overflow:auto;border:1px solid rgba(255,255,255,0.03);
+      display:flex;flex-direction:column;
+    }
+    textarea{
+      width:100%;flex:1;background:transparent;border:none;color:#dffbf0;font-family:var(--mono);font-size:13px;resize:none;outline:none;padding:6px;
+    }
+    .status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:8px}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center}
+    .modal{background:var(--panel);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);width:420px}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    input[type="text"], textarea.input{
+      background:var(--glass);border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:#dffbf0;font-family:var(--mono)
+    }
+    .small-btn{padding:6px 8px;font-size:12px;border-radius:6px}
+    .muted{color:var(--muted)}
+    .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+
+    /* footer note */
+    .note{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
+    a.link{color:var(--accent);text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">Xn</div>
+        <div>
+          <h1>XnDev Website Builder</h1>
+          <div class="sub">A minimal Glitch-like IDE — powered by Puter.js</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div id="projectTag" class="project-info small">Initializing project...</div>
+        <button id="createBtn">＋ Create File</button>
+        <button id="deployBtn">🚀 Deploy</button>
+      </div>
+    </header>
+
+    <!-- Left: files -->
+    <aside class="sidebar panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="small muted">Files</div>
+        <div class="small muted">Editable • Save to disk</div>
+      </div>
+      <div id="files" class="files" role="list"></div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="refreshBtn" class="ghost small-btn">Refresh</button>
+        <button id="newIndexBtn" class="ghost small-btn">Quick index.html</button>
+      </div>
+
+      <div class="note">Note: This UI uses <span class="muted">Puter.js</span></div>
+    </aside>
+
+    <!-- Right: editor -->
+    <main class="panel editor-area">
+      <div class="editor-toolbar">
+        <div id="currentFileName" class="file-name muted">— no file selected —</div>
+        <div style="flex:1"></div>
+        <button id="saveBtn" class="small-btn">💾 Save</button>
+        <button id="renameBtn" class="small-btn">✏️ Rename</button>
+        <button id="deleteBtn" class="small-btn">🗑️ Delete</button>
+      </div>
+
+      <div class="editor">
+        <textarea id="editor" placeholder="// Open a file to begin editing" spellcheck="false"></textarea>
+        <div id="status" class="status muted">status: idle</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create file modal (hidden) -->
+  <div id="modalCreate" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>Create File</strong>
+        <button id="modalClose" class="small-btn">✕</button>
+      </div>
+      <div class="field">
+        <label class="small muted">File name (relative to project root)</label>
+        <input id="newFileName" type="text" placeholder="index.html or assets/app.js" />
+      </div>
+      <div class="field">
+        <label class="small muted">Content</label>
+        <textarea id="newFileContent" class="input" rows="8" placeholder="&lt;h1&gt;Hello&lt;/h1&gt;"></textarea>
+      </div>
+      <div class="actions">
+        <button id="modalCreateBtn" class="small-btn">Create</button>
+        <button id="modalCancel" class="small-btn ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // XnDev Website Builder — uses Puter.js
+    (async () => {
+      // Project root directory (random)
+      let projectDir = puter ? puter.randName() : 'xnproj-' + Date.now();
+      const projectTag = document.getElementById('projectTag');
+      projectTag.textContent = 'Project: ' + projectDir;
+
+      // DOM handles
+      const filesEl = document.getElementById('files');
+      const editorEl = document.getElementById('editor');
+      const statusEl = document.getElementById('status');
+      const currentFileNameEl = document.getElementById('currentFileName');
+
+      const createBtn = document.getElementById('createBtn');
+      const deployBtn = document.getElementById('deployBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      const renameBtn = document.getElementById('renameBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const newIndexBtn = document.getElementById('newIndexBtn');
+
+      const modal = document.getElementById('modalCreate');
+      const modalClose = document.getElementById('modalClose');
+      const modalCancel = document.getElementById('modalCancel');
+      const modalCreateBtn = document.getElementById('modalCreateBtn');
+      const newFileName = document.getElementById('newFileName');
+      const newFileContent = document.getElementById('newFileContent');
+
+      let currentFile = null;
+      let fileList = []; // array of filenames
+
+      // Utilities
+      function setStatus(msg, tone='muted'){
+        statusEl.textContent = 'status: ' + msg;
+      }
+
+      function safePathJoin(dir, file){
+        if (!file) return dir;
+        // normalize: remove leading slashes
+        file = file.replace(/^\/+/, '');
+        return `${dir}/${file}`;
+      }
+
+      async function ensureProjectDir(){
+        try{
+          await puter.fs.mkdir(projectDir);
+        }catch(e){
+          // some fs.mkdir implementations throw if exists — ignore
+        }
+      }
+
+      // Read files in project dir.
+      async function loadFileList(){
+        setStatus('loading file list...');
+        filesEl.innerHTML = '';
+        fileList = [];
+        try{
+          // try readdir
+          let list = [];
+          if (puter.fs.readdir) {
+            list = await puter.fs.readdir(projectDir);
+          } else if (puter.fs.ls) {
+            list = await puter.fs.ls(projectDir);
+          } else {
+            // fallback: try reading a manifest file
+            try {
+              const manifest = await puter.fs.read(`${projectDir}/.xn_manifest`);
+              list = manifest ? JSON.parse(manifest) : [];
+            } catch (e) {
+              list = [];
+            }
+          }
+
+          // If API returns objects, map to names
+          if (Array.isArray(list)) {
+            fileList = list.map(i => (typeof i === 'string' ? i : (i.name || i.filename || i.path)));
+          } else {
+            fileList = [];
+          }
+
+        }catch(err){
+          // If readdir not supported, attempt a naive approach: try some common files
+          console.warn('readdir failed, falling back', err);
+          // fallback: try reading index.html only
+          try{
+            await puter.fs.read(`${projectDir}/index.html`);
+            fileList = ['index.html'];
+          }catch(e){
+            fileList = [];
+          }
+        }
+
+        // Render
+        if (fileList.length === 0){
+          filesEl.innerHTML = `<div class="small muted" style="padding:12px">No files yet. Create one.</div>`;
+        } else {
+          filesEl.innerHTML = '';
+          fileList.forEach(fname => {
+            const el = document.createElement('div');
+            el.className = 'file-item';
+            el.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="width:10px;height:10px;border-radius:2px;background:linear-gradient(180deg,var(--accent),#00c36a)"></div><div class="file-name">${fname}</div></div><div class="small muted">⋯</div>`;
+            el.onclick = () => openFile(fname, el);
+            filesEl.appendChild(el);
+          });
+        }
+        setStatus('ready');
+      }
+
+      async function openFile(fname, element){
+        setStatus('opening ' + fname + '...');
+        try{
+          const path = safePathJoin(projectDir, fname);
+          const content = await puter.fs.read(path);
+          editorEl.value = content ?? '';
+          currentFile = fname;
+          currentFileNameEl.textContent = fname;
+          // highlight
+          Array.from(filesEl.children).forEach(c => c.classList.remove('active'));
+          if (element) element.classList.add('active');
+          setStatus('file opened');
+        }catch(err){
+          console.error(err);
+          editorEl.value = '';
+          currentFile = null;
+          currentFileNameEl.textContent = '— no file selected —';
+          setStatus('failed to open file: ' + (err.message || err));
+        }
+      }
+
+      async function saveCurrentFile(){
+        if (!currentFile){
+          setStatus('no file selected to save');
+          return;
+        }
+        setStatus('saving ' + currentFile + '...');
+        try{
+          const path = safePathJoin(projectDir, currentFile);
+          await puter.fs.write(path, editorEl.value);
+          setStatus('saved ' + currentFile);
+        }catch(err){
+          console.error(err);
+          setStatus('save failed: ' + (err.message || err));
+        }
+      }
+
+      async function createFile(name, content){
+        if (!name || name.trim() === '') {
+          setStatus('filename cannot be empty');
+          return;
+        }
+        name = name.replace(/^\/+/, '');
+        const path = safePathJoin(projectDir, name);
+        setStatus('creating ' + name + '...');
+        try{
+          await puter.fs.write(path, content ?? '');
+          // update manifest fallback
+          try{
+            if (!puter.fs.readdir && puter.fs.read && puter.fs.write) {
+              // maintain manifest
+              let manifest = [];
+              try{
+                manifest = JSON.parse(await puter.fs.read(`${projectDir}/.xn_manifest`) || '[]');
+              }catch(e){ manifest = []; }
+              if (!manifest.includes(name)) manifest.push(name);
+              await puter.fs.write(`${projectDir}/.xn_manifest`, JSON.stringify(manifest));
+            }
+          }catch(e){ /* ignore */ }
+
+          await loadFileList();
+          setStatus('created ' + name);
+        }catch(err){
+          console.error(err);
+          setStatus('create failed: ' + (err.message || err));
+        }
+      }
+
+      async function deleteFile(fname){
+        if (!fname) return;
+        if (!confirm(`Delete ${fname}? This cannot be undone.`)) return;
+        setStatus('deleting ' + fname + '...');
+        try{
+          const path = safePathJoin(projectDir, fname);
+          if (puter.fs.unlink) {
+            await puter.fs.unlink(path);
+          } else if (puter.fs.rm) {
+            await puter.fs.rm(path);
+          } else if (puter.fs.remove) {
+            await puter.fs.remove(path);
+          } else {
+            // best effort: overwrite with empty and remove from manifest
+            await puter.fs.write(path, '');
+            // update manifest if exists
+            try{
+              const manifestRaw = await puter.fs.read(`${projectDir}/.xn_manifest`);
+              let manifest = manifestRaw ? JSON.parse(manifestRaw) : [];
+              manifest = manifest.filter(m => m !== fname);
+              await puter.fs.write(`${projectDir}/.xn_manifest`, JSON.stringify(manifest));
+            }catch(e){}
+          }
+          currentFile = null;
+          currentFileNameEl.textContent = '— no file selected —';
+          editorEl.value = '';
+          await loadFileList();
+          setStatus('deleted ' + fname);
+        }catch(err){
+          console.error(err);
+          setStatus('delete failed: ' + (err.message || err));
+        }
+      }
+
+      async function renameFile(oldName){
+        if (!oldName) return;
+        const newName = prompt('Rename file', oldName);
+        if (!newName || newName.trim() === '' || newName === oldName) return;
+        setStatus(`renaming ${oldName} → ${newName}...`);
+        try{
+          const oldPath = safePathJoin(projectDir, oldName);
+          const newPath = safePathJoin(projectDir, newName);
+          if (puter.fs.rename) {
+            await puter.fs.rename(oldPath, newPath);
+          } else {
+            // fallback: copy content and delete original
+            const content = await puter.fs.read(oldPath);
+            await puter.fs.write(newPath, content || '');
+            try {
+              if (puter.fs.unlink) await puter.fs.unlink(oldPath);
+            } catch(e){}
+            // update manifest if present
+            try{
+              const manifestRaw = await puter.fs.read(`${projectDir}/.xn_manifest`);
+              let manifest = manifestRaw ? JSON.parse(manifestRaw) : [];
+              manifest = manifest.filter(m => m !== oldName);
+              if (!manifest.includes(newName)) manifest.push(newName);
+              await puter.fs.write(`${projectDir}/.xn_manifest`, JSON.stringify(manifest));
+            }catch(e){}
+          }
+          await loadFileList();
+          setStatus('renamed');
+        }catch(err){
+          console.error(err);
+          setStatus('rename failed: ' + (err.message || err));
+        }
+      }
+
+      // Deploy: create hosting and show URL
+      async function deployProject(){
+        setStatus('creating deployment...');
+        try{
+          const subdomain = puter.randName();
+          const site = await puter.hosting.create(subdomain, projectDir);
+          const url = `https://${site.subdomain}.puter.site`;
+          // show friendly link
+          const win = window.open(url, '_blank');
+          // also show inline
+          setStatus('deployed: ' + url);
+          alert('Website deployed at:\n' + url);
+        }catch(err){
+          console.error(err);
+          setStatus('deploy failed: ' + (err.message || err));
+          alert('Deploy failed: ' + (err.message || err));
+        }
+      }
+
+      // Event bindings
+      createBtn.onclick = () => {
+        newFileName.value = '';
+        newFileContent.value = '';
+        modal.style.display = 'flex';
+        newFileName.focus();
+      };
+      modalClose.onclick = modalCancel.onclick = () => modal.style.display = 'none';
+      modalCreateBtn.onclick = async () => {
+        const name = newFileName.value.trim();
+        const content = newFileContent.value;
+        modal.style.display = 'none';
+        await createFile(name, content);
+      };
+
+      saveBtn.onclick = saveCurrentFile;
+      refreshBtn.onclick = loadFileList;
+      newIndexBtn.onclick = async () => {
+        await createFile('index.html', '<!doctype html><html><head><meta charset="utf-8"><title>XnDev</title></head><body><h1>Hello from XnDev</h1></body></html>');
+      };
+      deployBtn.onclick = deployProject;
+      deleteBtn.onclick = async () => {
+        if (!currentFile) { setStatus('no file selected'); return; }
+        await deleteFile(currentFile);
+      };
+      renameBtn.onclick = async () => {
+        if (!currentFile) { setStatus('no file selected'); return; }
+        await renameFile(currentFile);
+      };
+
+      // init
+      await ensureProjectDir();
+
+      // create a default index.html (only if empty)
+      try{
+        await loadFileList();
+        if (fileList.length === 0){
+          await createFile('index.html', '<!doctype html><html><head><meta charset="utf-8"><title>XnDev</title></head><body><h1>Hello, XnDev Website Builder!</h1><p>Powered by Puter.js</p></body></html>');
+        }
+      }catch(e){
+        console.warn('initial create failed', e);
+      }
+
+      // initial load
+      await loadFileList();
+
+      // keyboard shortcuts (Ctrl/Cmd+S save)
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          saveCurrentFile();
+        }
+      });
+
+      setStatus('ready — tip: use Create File to add files, then Deploy to publish');
+
+    })();
+  </script>
+</body>
+</html>
