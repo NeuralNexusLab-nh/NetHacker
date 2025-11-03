@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<body>
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        if (window.location.hash) {
+            var text = window.location.hash.substring(1);
+            document.body.innerHTML = "Loding DALL.E 3 Image Generation... (Puter.js)";
+        } else {
+            var text = "no";
+            document.body.innerHTML = "Please add your image prompt in this URL's after '#' such as <a href='https://nethacker.cloud/projects/dalle3#A picture about a cat.' target='_blank'>this</a>";
+        }
+        if (text != "no") {
+            puter.ai.txt2img(text, true).then((image)=>{
+                document.body.innerHTML = "";
+                document.body.appendChild(image);
+            });
+        }
+    </script>
+</body>
+</html>
