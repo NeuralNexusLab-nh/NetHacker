@@ -1,4 +1,4 @@
-![NetHacker Logo](https://nethacker.cloud/favicon.png/)
+[![點我](https://nethacker.cloud/favicon.png)](https://nethacker.cloud)
 # NetHacker
 
 **The best Vulnerability Researcher**
