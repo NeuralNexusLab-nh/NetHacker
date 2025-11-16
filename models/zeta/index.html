@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZetaAI</title>
+  <title>Zeta</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="icon" href="favicon.png" type="image/png">
   <style>
@@ -85,7 +85,7 @@
   </style>
 </head>
 <body>
-  <h1>⚡ ZetaAI x1 Playground ⚡</h1>
+  <h1>⚡ Zeta x1 LITE Playground ⚡</h1>
   <div id="terminal"></div>
   <div id="inputArea">
     <input id="input" type="text" placeholder="> type your message..." autofocus>
@@ -99,10 +99,10 @@
     const sendBtn = document.getElementById('sendBtn');
     const deleteBtn = document.getElementById('deleteBtn');
 
-    const CHAT_KEY = "Zeta-chatLog"; // 統一 LocalStorage key
+    const CHAT_KEY = "Zeta-chatLog";
     let chatHistory = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
 
-    printMessage("System Booted...\nConnected to ZetaAI x1 (NeuralNexusLab)", "ai");
+    printMessage("System Booted...\nConnected to ZetaAI x1 LITE (NeuralNexusLab)", "ai");
     chatHistory.forEach(msg => printMessage(msg.text, msg.role));
 
     function saveChat(role, text) {
@@ -120,7 +120,7 @@
     }
 
     async function typeText(element, fullText) {
-      element.textContent = "ZetaAI x1> ";
+      element.textContent = "ZetaAI x1 LITE> ";
       const cursor = document.createElement("span");
       cursor.classList.add("cursor");
       element.appendChild(cursor);
@@ -131,7 +131,7 @@
         index += chunkSize;
         if(index > fullText.length) index = fullText.length;
 
-        element.textContent = "ZetaAI x1> " + fullText.slice(0, index);
+        element.textContent = "ZetaAI x1 LITE> " + fullText.slice(0, index);
         element.appendChild(cursor);
         terminal.scrollTop = terminal.scrollHeight;
 
@@ -149,7 +149,7 @@
       saveChat("user", userText);
       input.value = "";
 
-      const aiMsg = printMessage("ZetaAI x1> thinking...", "ai");
+      const aiMsg = printMessage("ZetaAI x1 LITE> thinking...", "ai");
 
       try {
         const response = await fetch("https://zeta.nethacker.cloud/api?prompt=" + encodeURIComponent(userText));
@@ -174,7 +174,7 @@
       localStorage.removeItem(CHAT_KEY);
       chatHistory = [];
       terminal.innerHTML = "";
-      printMessage("System Booted...\nConnected to ZetaAI x1 (NeuralNexusLab)", "ai");
+      printMessage("System Booted...\nConnected to ZetaAI x1 LITE (NeuralNexusLab)", "ai");
     });
   </script>
 </body>
