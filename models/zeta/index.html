@@ -85,7 +85,7 @@
   </style>
 </head>
 <body>
-  <h1>⚡ Zeta x1 LITE Playground ⚡</h1>
+  <h1>⚡ Zeta XF Playground ⚡</h1>
   <div id="terminal"></div>
   <div id="inputArea">
     <input id="input" type="text" placeholder="> type your message..." autofocus>
@@ -102,7 +102,7 @@
     const CHAT_KEY = "Zeta-chatLog";
     let chatHistory = JSON.parse(localStorage.getItem(CHAT_KEY)) || [];
 
-    printMessage("System Booted...\nConnected to ZetaAI x1 LITE (NeuralNexusLab)", "ai");
+    printMessage("System Booted...\nConnected to ZetaAI XF (NeuralNexusLab)", "ai");
     chatHistory.forEach(msg => printMessage(msg.text, msg.role));
 
     function saveChat(role, text) {
@@ -120,7 +120,7 @@
     }
 
     async function typeText(element, fullText) {
-      element.textContent = "ZetaAI x1 LITE> ";
+      element.textContent = "Zeta XF> ";
       const cursor = document.createElement("span");
       cursor.classList.add("cursor");
       element.appendChild(cursor);
@@ -131,7 +131,7 @@
         index += chunkSize;
         if(index > fullText.length) index = fullText.length;
 
-        element.textContent = "ZetaAI x1 LITE> " + fullText.slice(0, index);
+        element.textContent = "Zeta XF> " + fullText.slice(0, index);
         element.appendChild(cursor);
         terminal.scrollTop = terminal.scrollHeight;
 
@@ -149,7 +149,7 @@
       saveChat("user", userText);
       input.value = "";
 
-      const aiMsg = printMessage("ZetaAI x1 LITE> thinking...", "ai");
+      const aiMsg = printMessage("Zeta XF> thinking...", "ai");
 
       try {
         const response = await fetch("https://zeta.nethacker.cloud/api?prompt=" + encodeURIComponent(userText));
@@ -174,7 +174,7 @@
       localStorage.removeItem(CHAT_KEY);
       chatHistory = [];
       terminal.innerHTML = "";
-      printMessage("System Booted...\nConnected to ZetaAI x1 LITE (NeuralNexusLab)", "ai");
+      printMessage("System Booted...\nConnected to ZetaAI XF (NeuralNexusLab)", "ai");
     });
   </script>
 </body>
