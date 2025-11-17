@@ -152,7 +152,7 @@
       const aiMsg = printMessage("Zeta Hack> thinking...", "ai");
 
       try {
-        const response = await fetch("https://zeta.nethacker.cloud/api/zeta?prompt=" + encodeURIComponent(userText));
+        const response = await fetch("https://zeta.nethacker.cloud/api/zetahack?prompt=" + encodeURIComponent(userText));
         const data = await response.json();
         const reply = data["return"] || "[API haven't responded]";
 
