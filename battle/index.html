@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battlefield Simulator V3 - Giant Edition</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        canvas { display: block; }
+        
+        /* UI Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .hud-panel {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            pointer-events: auto;
+            border: 1px solid #555;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        #info-panel {
+            top: 20px;
+            left: 20px;
+            min-width: 220px;
+        }
+
+        button {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-top: 8px;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover { background: #388E3C; }
+        button:active { transform: translateY(1px); }
+
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .zoom-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* Virtual D-Pad (Bottom Right) */
+        .d-pad {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 140px;
+            height: 140px;
+            pointer-events: auto;
+        }
+        .d-btn {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .d-btn:active { background: rgba(255, 255, 255, 0.4); }
+        .d-up { top: 0; left: 47.5px; }
+        .d-down { bottom: 0; left: 47.5px; }
+        .d-left { top: 47.5px; left: 0; }
+        .d-right { top: 47.5px; right: 0; }
+
+        /* Win Banner Animation */
+        #win-banner {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            margin-top: -60px;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 60px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            transform: scaleX(0);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            pointer-events: none;
+            opacity: 0;
+        }
+        #win-banner.active {
+            transform: scaleX(1);
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="win-banner">BLUE TEAM WINS!</div>
+
+    <div id="ui-layer">
+        <div id="info-panel" class="hud-panel">
+            <h3>Battle Control</h3>
+            <div id="stats">Loading...</div>
+            <button onclick="initGame()">🔄 Restart Simulation</button>
+        </div>
+        
+        <div class="zoom-controls">
+            <div class="zoom-btn" onclick="adjustZoom(0.1)">+</div>
+            <div class="zoom-btn" onclick="adjustZoom(-0.1)">-</div>
+        </div>
+
+        <div class="d-pad">
+            <div class="d-btn d-up" onmousedown="input.up=true" onmouseup="input.up=false" ontouchstart="input.up=true" ontouchend="input.up=false">W</div>
+            <div class="d-btn d-down" onmousedown="input.down=true" onmouseup="input.down=false" ontouchstart="input.down=true" ontouchend="input.down=false">S</div>
+            <div class="d-btn d-left" onmousedown="input.left=true" onmouseup="input.left=false" ontouchstart="input.left=true" ontouchend="input.left=false">A</div>
+            <div class="d-btn d-right" onmousedown="input.right=true" onmouseup="input.right=false" ontouchstart="input.right=true" ontouchend="input.right=false">D</div>
+        </div>
+    </div>
+
+<script>
+// === CONFIGURATION ===
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Enlarged Map to accommodate giant units
+const WORLD_WIDTH = 4000;
+const WORLD_HEIGHT = 3000;
+const TEAM_BLUE = 'blue';
+const TEAM_RED = 'red';
+
+// === 4x SIZE SCALING ===
+// Sizes have been roughly quadrupled compared to original
+const UNIT_TYPES = {
+    RIFLE:  { name: 'Rifleman', hp: 40, speed: 0.7, range: 400, damage: 4, reload: 50, color: '#4fa3ff', size: 24 }, // Size 6 -> 24
+    MG:     { name: 'MG Unit',  hp: 60, speed: 0.4, range: 350, damage: 2, reload: 10, color: '#FFD700', size: 32 }, // Size 8 -> 32
+    SNIPER: { name: 'Sniper',   hp: 25, speed: 0.5, range: 800, damage: 45, reload: 180, color: '#ffffff', size: 24 }, 
+    TANK:   { name: 'Tank',     hp: 800, speed: 0.3, range: 500, damage: 100, reload: 200, color: '#005000', size: 75 }, // Size 18 -> 75
+    BOMBER: { name: 'Bomber',   hp: 999, speed: 1.8, range: 0,   damage: 150, reload: 30, color: '#222', size: 120 }  // Huge bomber
+};
+
+// State
+let units = [];
+let bullets = [];
+let particles = [];
+let obstacles = [];
+let gameActive = true;
+
+// Camera
+const camera = {
+    x: WORLD_WIDTH / 2,
+    y: WORLD_HEIGHT / 2,
+    scale: 0.4, // Zoom out more initially because units are huge
+    speed: 20
+};
+
+// Minimap Config
+const MINIMAP_SIZE = 220;
+const MINIMAP_MARGIN = 20;
+
+// Input
+const input = { up: false, down: false, left: false, right: false };
+
+// Events
+window.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if(key === 'w') input.up = true;
+    if(key === 's') input.down = true;
+    if(key === 'a') input.left = true;
+    if(key === 'd') input.right = true;
+});
+
+window.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    if(key === 'w') input.up = false;
+    if(key === 's') input.down = false;
+    if(key === 'a') input.left = false;
+    if(key === 'd') input.right = false;
+});
+
+window.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    adjustZoom(e.deltaY * -0.001);
+}, { passive: false });
+
+function adjustZoom(amount) {
+    camera.scale += amount;
+    camera.scale = Math.min(Math.max(0.1, camera.scale), 2.0); 
+}
+
+// === CLASSES ===
+
+class Vector {
+    constructor(x, y) { this.x = x; this.y = y; }
+    dist(v) { return Math.hypot(this.x - v.x, this.y - v.y); }
+}
+
+class Obstacle {
+    constructor(x, y, w, h) {
+        this.x = x; this.y = y; this.w = w; this.h = h;
+    }
+    draw(ctx) {
+        ctx.fillStyle = '#5D4037';
+        ctx.strokeStyle = '#3E2723';
+        ctx.lineWidth = 5; // Thicker lines
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.strokeRect(this.x, this.y, this.w, this.h);
+        
+        // Texture
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(this.x + 10, this.y + 10, this.w - 20, this.h - 20);
+    }
+}
+
+class Unit {
+    constructor(type, team, x, y) {
+        this.type = type;
+        this.team = team;
+        this.pos = new Vector(x, y);
+        
+        const stats = UNIT_TYPES[type];
+        this.hp = stats.hp;
+        this.maxHp = stats.hp;
+        this.speed = stats.speed; 
+        this.range = stats.range;
+        this.damage = stats.damage;
+        this.reloadTime = stats.reload;
+        this.currentReload = Math.random() * stats.reload;
+        this.size = stats.size;
+        
+        this.target = null;
+        this.angle = team === TEAM_BLUE ? 0 : Math.PI;
+        
+        if (this.type === 'BOMBER') {
+            this.pos.y = Math.random() * WORLD_HEIGHT;
+            this.pos.x = team === TEAM_BLUE ? -600 : WORLD_WIDTH + 600;
+            this.angle = team === TEAM_BLUE ? 0 : Math.PI;
+        }
+    }
+
+    update() {
+        if (!gameActive) return; // Stop logic if game over
+
+        if (this.type === 'BOMBER') {
+            this.updateBomber();
+            return;
+        }
+
+        // 1. AI: Find Target
+        if (!this.target || this.target.hp <= 0) {
+            this.findTarget();
+        }
+
+        // 2. AI: Move & Combat
+        if (this.target) {
+            const dist = this.pos.dist(this.target.pos);
+            const dx = this.target.pos.x - this.pos.x;
+            const dy = this.target.pos.y - this.pos.y;
+            const desiredAngle = Math.atan2(dy, dx);
+
+            this.angle = desiredAngle; // Instant turn for simplicity on giant units
+
+            // Check LOS
+            const hasLOS = this.checkLineOfSight(this.target.pos);
+
+            if (dist <= this.range && hasLOS) {
+                // Attack
+                if (this.currentReload <= 0) {
+                    this.fire();
+                    this.currentReload = this.reloadTime;
+                }
+            } else {
+                // Separation Force (Stronger for giant units)
+                let sepX = 0, sepY = 0;
+                for(let other of units) {
+                    if (other !== this && other.team === this.team) {
+                        let d = this.pos.dist(other.pos);
+                        if (d < this.size * 2.5) { // Separation radius
+                            sepX += (this.pos.x - other.pos.x) / d;
+                            sepY += (this.pos.y - other.pos.y) / d;
+                        }
+                    }
+                }
+                
+                let moveX = Math.cos(this.angle) + sepX * 2.0;
+                let moveY = Math.sin(this.angle) + sepY * 2.0;
+                
+                const len = Math.hypot(moveX, moveY);
+                if (len > 0) { moveX /= len; moveY /= len; }
+
+                this.moveSmart(moveX, moveY);
+            }
+        } else {
+            // March forward
+            const dir = this.team === TEAM_BLUE ? 1 : -1;
+            this.moveSmart(dir, 0);
+        }
+        
+        if (this.currentReload > 0) this.currentReload--;
+    }
+
+    moveSmart(dx, dy) {
+        let intendedX = this.pos.x + dx * this.speed;
+        let intendedY = this.pos.y + dy * this.speed;
+        
+        if (!this.isColliding(intendedX, this.pos.y)) {
+            this.pos.x = intendedX;
+        }
+        if (!this.isColliding(this.pos.x, intendedY)) {
+            this.pos.y = intendedY;
+        }
+        
+        this.pos.x = Math.max(0, Math.min(WORLD_WIDTH, this.pos.x));
+        this.pos.y = Math.max(0, Math.min(WORLD_HEIGHT, this.pos.y));
+    }
+
+    isColliding(x, y) {
+        for(let obs of obstacles) {
+            if (x > obs.x - this.size && x < obs.x + obs.w + this.size &&
+                y > obs.y - this.size && y < obs.y + obs.h + this.size) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    checkLineOfSight(targetPos) {
+        const steps = 8; // More steps for larger map
+        for(let i = 1; i < steps; i++) {
+            const lx = this.pos.x + (targetPos.x - this.pos.x) * (i / steps);
+            const ly = this.pos.y + (targetPos.y - this.pos.y) * (i / steps);
+            for(let obs of obstacles) {
+                if (lx > obs.x && lx < obs.x + obs.w && ly > obs.y && ly < obs.y + obs.h) {
+                    return false; 
+                }
+            }
+        }
+        return true;
+    }
+
+    findTarget() {
+        let nearest = null;
+        let minDist = Infinity;
+        for (let u of units) {
+            if (u.team !== this.team && u.type !== 'BOMBER') {
+                const d = this.pos.dist(u.pos);
+                if (d < minDist) {
+                    minDist = d;
+                    nearest = u;
+                }
+            }
+        }
+        this.target = nearest;
+    }
+
+    fire() {
+        const spread = (Math.random() - 0.5) * 0.15;
+        const bulletAngle = this.angle + spread;
+        // Bullets are NOT scaled 4x, keeping them normal size for effect
+        const bulletSpeed = this.type === 'TANK' ? 8 : 9;
+        
+        bullets.push(new Bullet(
+            this.pos.x, this.pos.y, 
+            bulletAngle, 
+            this.damage, 
+            this.team, 
+            this.type === 'TANK', 
+            bulletSpeed
+        ));
+
+        if (this.type === 'TANK') {
+             createExplosion(this.pos.x + Math.cos(this.angle)*60, this.pos.y + Math.sin(this.angle)*60, '#aaa', 20);
+        }
+    }
+
+    updateBomber() {
+        this.pos.x += Math.cos(this.angle) * this.speed;
+        if (this.currentReload <= 0 && this.pos.x > 300 && this.pos.x < WORLD_WIDTH - 300) {
+            bullets.push(new Bullet(this.pos.x, this.pos.y, Math.PI/2, 120, this.team, true, 5)); 
+            this.currentReload = 12; 
+        }
+        if (this.currentReload > 0) this.currentReload--;
+        if (this.pos.x < -1200 || this.pos.x > WORLD_WIDTH + 1200) this.hp = 0;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.pos.x, this.pos.y);
+        ctx.rotate(this.angle);
+
+        if (this.type === 'BOMBER') {
+            ctx.fillStyle = '#111';
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.beginPath();
+            ctx.moveTo(100, 0);
+            ctx.lineTo(-80, 80);
+            ctx.lineTo(-80, -80);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        } else if (this.type === 'TANK') {
+            // Giant Tank
+            ctx.fillStyle = this.team === TEAM_BLUE ? '#1565C0' : '#C62828';
+            ctx.fillRect(-50, -50, 100, 100); // Body
+            ctx.fillStyle = '#111'; 
+            ctx.fillRect(0, -15, 110, 30); // Cannon
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(-50, -50, 100, 100);
+            // Treads
+            ctx.fillStyle = '#222';
+            ctx.fillRect(-50, -65, 100, 15);
+            ctx.fillRect(-50, 50, 100, 15);
+        } else {
+            // Giant Infantry
+            ctx.fillStyle = this.team === TEAM_BLUE ? '#42A5F5' : '#EF5350';
+            
+            if (this.type === 'SNIPER') {
+                ctx.beginPath(); ctx.arc(0, 0, this.size, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.stroke(); 
+                ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(60,0); ctx.stroke(); // Long Gun
+            } else if (this.type === 'MG') {
+                ctx.fillRect(-this.size, -this.size, this.size*2, this.size*2); 
+                ctx.fillStyle='black'; ctx.fillRect(0, -8, 50, 16);
+            } else {
+                ctx.beginPath(); ctx.arc(0, 0, this.size, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle='#222'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(40,0); ctx.stroke();
+            }
+        }
+
+        // HP Bar
+        if (this.hp < this.maxHp && this.type !== 'BOMBER') {
+            ctx.rotate(-this.angle);
+            const width = this.size * 2.5;
+            const pct = this.hp / this.maxHp;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(-width/2, -this.size - 20, width, 8);
+            ctx.fillStyle = pct > 0.5 ? '#0f0' : '#f00';
+            ctx.fillRect(-width/2, -this.size - 20, width * pct, 8);
+        }
+
+        ctx.restore();
+    }
+}
+
+class Bullet {
+    constructor(x, y, angle, damage, team, isExplosive, speed) {
+        this.x = x; this.y = y;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.damage = damage;
+        this.team = team;
+        this.isExplosive = isExplosive;
+        this.life = 120;
+    }
+
+    update() {
+        if (!gameActive) return;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+        
+        for (let u of units) {
+            if (u.team !== this.team && u.hp > 0) {
+                // Adjusted Hitbox for giant units
+                if (Math.abs(u.pos.x - this.x) < u.size + 5 && Math.abs(u.pos.y - this.y) < u.size + 5) {
+                    this.hit(u);
+                    return true; 
+                }
+            }
+        }
+        for(let obs of obstacles) {
+             if (this.x > obs.x && this.x < obs.x + obs.w &&
+                this.y > obs.y && this.y < obs.y + obs.h) {
+                createExplosion(this.x, this.y, '#ccc', 5);
+                if(this.isExplosive) this.explodeArea();
+                return true;
+            }
+        }
+        return this.life <= 0;
+    }
+
+    hit(target) {
+        if (this.isExplosive) {
+            this.explodeArea();
+        } else {
+            target.hp -= this.damage;
+            createExplosion(this.x, this.y, target.team === TEAM_BLUE ? '#42A5F5' : '#EF5350', 5);
+        }
+    }
+
+    explodeArea() {
+        createExplosion(this.x, this.y, 'orange', 30);
+        units.forEach(u => {
+            const dist = u.pos.dist({x: this.x, y: this.y});
+            if (dist < u.size + 60) { 
+                u.hp -= this.damage;
+                createExplosion(u.pos.x, u.pos.y, 'red', 10);
+            }
+        });
+    }
+
+    draw(ctx) {
+        ctx.fillStyle = this.isExplosive ? '#FFA500' : '#FFFF00';
+        ctx.beginPath();
+        const r = this.isExplosive ? 6 : 3; // Slight bullet size increase but not 4x
+        ctx.arc(this.x, this.y, r, 0, Math.PI*2);
+        ctx.fill();
+    }
+}
+
+class Particle {
+    constructor(x, y, color, size) {
+        this.x = x; this.y = y;
+        this.color = color;
+        this.size = size;
+        this.life = 1.0;
+        this.vx = (Math.random() - 0.5) * 4;
+        this.vy = (Math.random() - 0.5) * 4;
+    }
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life -= 0.05;
+        this.size *= 0.9;
+    }
+    draw(ctx) {
+        ctx.globalAlpha = this.life;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+    }
+}
+
+function createExplosion(x, y, color, size) {
+    for(let i=0; i<5; i++) {
+        particles.push(new Particle(x, y, color, size * (0.5 + Math.random())));
+    }
+}
+
+// === GAME LOGIC ===
+
+function initGame() {
+    gameActive = true;
+    units = [];
+    bullets = [];
+    particles = [];
+    obstacles = [];
+    document.getElementById('win-banner').classList.remove('active');
+    
+    // Giant Obstacles (Fewer but Bigger)
+    const obstacleCount = 15 + Math.floor(Math.random() * 10);
+    for(let i=0; i<obstacleCount; i++) {
+        let w = 200 + Math.random() * 300; // Much wider
+        let h = 100 + Math.random() * 150;
+        let x = 400 + Math.random() * (WORLD_WIDTH - 800);
+        let y = 200 + Math.random() * (WORLD_HEIGHT - 400);
+        obstacles.push(new Obstacle(x, y, w, h));
+    }
+
+    const config = {
+        rifle: 70,
+        mg: 8,
+        sniper: 5,
+        tank: 3, 
+        bomber: 0
+    };
+
+    spawnTeam(TEAM_BLUE, config);
+    spawnTeam(TEAM_RED, config);
+
+    camera.x = WORLD_WIDTH / 2 - (canvas.width / camera.scale) / 2;
+    camera.y = WORLD_HEIGHT / 2 - (canvas.height / camera.scale) / 2;
+}
+
+function spawnTeam(team, counts) {
+    const isBlue = team === TEAM_BLUE;
+    const baseX = isBlue ? 200 : WORLD_WIDTH - 200;
+    const spreadX = 400;
+    const dir = isBlue ? 1 : -1;
+
+    for(let i=0; i<counts.rifle; i++) units.push(new Unit('RIFLE', team, baseX + (Math.random()*spreadX*dir), Math.random() * WORLD_HEIGHT));
+    for(let i=0; i<counts.mg; i++) units.push(new Unit('MG', team, baseX + (Math.random()*300*dir), Math.random() * WORLD_HEIGHT));
+    for(let i=0; i<counts.sniper; i++) units.push(new Unit('SNIPER', team, isBlue ? 100 : WORLD_WIDTH - 100, Math.random() * WORLD_HEIGHT));
+    for(let i=0; i<counts.tank; i++) units.push(new Unit('TANK', team, baseX + (500*dir), WORLD_HEIGHT * 0.2 + Math.random() * WORLD_HEIGHT * 0.6));
+}
+
+function update() {
+    if (!gameActive) return;
+
+    const speed = camera.speed / camera.scale;
+    if (input.up) camera.y -= speed;
+    if (input.down) camera.y += speed;
+    if (input.left) camera.x -= speed;
+    if (input.right) camera.x += speed;
+
+    const viewW = canvas.width / camera.scale;
+    const viewH = canvas.height / camera.scale;
+    camera.x = Math.max(-500, Math.min(camera.x, WORLD_WIDTH - viewW + 500));
+    camera.y = Math.max(-500, Math.min(camera.y, WORLD_HEIGHT - viewH + 500));
+
+    units = units.filter(u => u.hp > 0);
+    units.forEach(u => u.update());
+    bullets = bullets.filter(b => !b.update());
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => p.update());
+
+    if (Math.random() < 0.0005) {
+        const team = Math.random() > 0.5 ? TEAM_BLUE : TEAM_RED;
+        units.push(new Unit('BOMBER', team, 0, 0));
+    }
+
+    updateStats();
+    checkWin();
+}
+
+function checkWin() {
+    const blueCount = units.filter(u => u.team === TEAM_BLUE).length;
+    const redCount = units.filter(u => u.team === TEAM_RED).length;
+
+    if (blueCount === 0 || redCount === 0) {
+        gameActive = false;
+        const banner = document.getElementById('win-banner');
+        
+        if (blueCount > 0) {
+            banner.textContent = "BLUE TEAM WINS!";
+            banner.style.background = "rgba(33, 150, 243, 0.9)";
+        } else {
+            banner.textContent = "RED TEAM WINS!";
+            banner.style.background = "rgba(244, 67, 54, 0.9)";
+        }
+        
+        banner.classList.add('active');
+    }
+}
+
+function draw() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#263238'; 
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // === MAIN GAME VIEW ===
+    ctx.setTransform(camera.scale, 0, 0, camera.scale, -camera.x * camera.scale, -camera.y * camera.scale);
+
+    // Grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    for(let x=0; x<=WORLD_WIDTH; x+=400) { ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_HEIGHT); }
+    for(let y=0; y<=WORLD_HEIGHT; y+=400) { ctx.moveTo(0, y); ctx.lineTo(WORLD_WIDTH, y); }
+    ctx.stroke();
+
+    ctx.strokeStyle = '#444';
+    ctx.strokeRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+    obstacles.forEach(o => o.draw(ctx));
+    units.forEach(u => u.draw(ctx));
+    bullets.forEach(b => b.draw(ctx));
+    particles.forEach(p => p.draw(ctx));
+
+    // === MINIMAP DRAWING (UI Layer) ===
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to screen coordinates
+    
+    const mapW = MINIMAP_SIZE;
+    const mapH = MINIMAP_SIZE * (WORLD_HEIGHT / WORLD_WIDTH);
+    const mapX = MINIMAP_MARGIN;
+    const mapY = canvas.height - mapH - MINIMAP_MARGIN;
+
+    // Background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 2;
+    ctx.fillRect(mapX, mapY, mapW, mapH);
+    ctx.strokeRect(mapX, mapY, mapW, mapH);
+
+    // Minimap Content
+    // Helper to convert World Coord to Minimap Coord
+    const toMapX = (val) => mapX + (val / WORLD_WIDTH) * mapW;
+    const toMapY = (val) => mapY + (val / WORLD_HEIGHT) * mapH;
+
+    // Obstacles
+    ctx.fillStyle = '#5D4037';
+    obstacles.forEach(o => {
+        ctx.fillRect(toMapX(o.x), toMapY(o.y), (o.w / WORLD_WIDTH) * mapW, (o.h / WORLD_HEIGHT) * mapH);
+    });
+
+    // Units
+    units.forEach(u => {
+        ctx.fillStyle = u.team === TEAM_BLUE ? '#42A5F5' : '#EF5350';
+        // Larger dots for map
+        ctx.beginPath();
+        ctx.arc(toMapX(u.pos.x), toMapY(u.pos.y), 2, 0, Math.PI*2); 
+        ctx.fill();
+    });
+
+    // Camera Viewport Rect
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 1;
+    const viewRectW = (canvas.width / camera.scale / WORLD_WIDTH) * mapW;
+    const viewRectH = (canvas.height / camera.scale / WORLD_HEIGHT) * mapH;
+    const viewRectX = toMapX(camera.x);
+    const viewRectY = toMapY(camera.y);
+    ctx.strokeRect(viewRectX, viewRectY, viewRectW, viewRectH);
+    
+    // Minimap Label
+    ctx.fillStyle = 'white';
+    ctx.font = '10px Arial';
+    ctx.fillText("RADAR", mapX + 5, mapY + 12);
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+function updateStats() {
+    const blueCount = units.filter(u => u.team === TEAM_BLUE).length;
+    const redCount = units.filter(u => u.team === TEAM_RED).length;
+    const info = document.getElementById('stats');
+    info.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span style="color:#4fa3ff; font-weight:bold;">BLUE: ${blueCount}</span>
+            <span style="color:#ff4444; font-weight:bold;">RED: ${redCount}</span>
+        </div>
+        <div style="font-size:12px; color:#aaa;">Objects: ${units.length}</div>
+        <div style="font-size:12px; color:#aaa;">Zoom: ${camera.scale.toFixed(1)}x</div>
+    `;
+}
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resize);
+
+resize();
+initGame();
+loop();
+
+</script>
+</body>
+</html>
