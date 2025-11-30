@@ -3,46 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALPHA TERMINAL</title>
+    <title>ALPHA /// TERMINAL</title>
     <!-- 引入 Puter.js -->
     <script src="https://js.puter.com/v2/"></script>
-    <!-- Google Fonts: 駭客風格字體 -->
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
-    
+    <!-- 引入 Markdown 解析器 (讓 AI 輸出的程式碼好看一點) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg-color: #050505;
-            --sidebar-bg: #000000;
-            --main-bg: #0a0a0a;
-            --text-color: #0f0;
-            --dim-text: #008f00;
-            --border-color: #0f0;
-            --input-bg: #111;
-            --user-msg-bg: #002200;
-            --ai-msg-bg: #000000;
-            --accent: #0f0;
+            --term-green: #00ff41;
+            --term-dim: #008f11;
+            --term-dark: #003b00;
+            --alert: #ff3333;
+            --font-stack: 'Courier New', Courier, monospace;
         }
 
         * {
             box-sizing: border-box;
             scrollbar-width: thin;
-            scrollbar-color: var(--dim-text) var(--bg-color);
+            scrollbar-color: var(--term-green) var(--bg-color);
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Fira Code', 'Courier New', monospace;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--term-green);
+            font-family: var(--font-stack);
             height: 100vh;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
-            text-shadow: 0 0 2px var(--dim-text);
+            text-shadow: 0 0 2px var(--term-dim);
         }
 
-        /* CRT Scanline Effect */
+        /* CRT 掃描線效果 */
         body::before {
             content: " ";
             display: block;
@@ -57,125 +50,109 @@
             pointer-events: none;
         }
 
-        /* Login Screen */
+        /* 登入畫面 */
         #login-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-color);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            height: 100vh;
+            text-align: center;
         }
 
-        .glitch-title {
-            font-size: 4rem;
-            font-weight: bold;
+        h1 {
+            font-size: 3rem;
             margin-bottom: 2rem;
-            position: relative;
-            animation: glitch 1s infinite;
+            border: 2px solid var(--term-green);
+            padding: 1rem 2rem;
+            box-shadow: 0 0 15px var(--term-green);
+            animation: pulse 2s infinite;
         }
 
-        button {
+        .btn {
             background: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
+            color: var(--term-green);
+            border: 1px solid var(--term-green);
             padding: 10px 20px;
-            font-family: 'Fira Code', monospace;
+            font-family: var(--font-stack);
             font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.3s;
             text-transform: uppercase;
         }
 
-        button:hover {
-            background: var(--text-color);
+        .btn:hover {
+            background: var(--term-green);
             color: var(--bg-color);
-            box-shadow: 0 0 10px var(--text-color);
+            box-shadow: 0 0 10px var(--term-green);
         }
 
-        /* Main App Layout */
-        #app-container {
-            display: none; /* Hidden until logged in */
-            flex-direction: row;
-            height: 100%;
-            width: 100%;
+        .btn-danger {
+            border-color: var(--alert);
+            color: var(--alert);
+        }
+        .btn-danger:hover {
+            background: var(--alert);
+            color: var(--bg-color);
+            box-shadow: 0 0 10px var(--alert);
         }
 
-        /* Sidebar */
+        /* 主應用程式介面 (ChatGPT Layout) */
+        #app-screen {
+            display: none; /* 預設隱藏 */
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 側邊欄 */
         #sidebar {
             width: 260px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--dim-text);
+            background: #001100;
+            border-right: 1px solid var(--term-green);
             display: flex;
             flex-direction: column;
             padding: 1rem;
+            gap: 1rem;
             flex-shrink: 0;
         }
 
-        .brand {
-            font-size: 1.5rem;
-            border-bottom: 1px solid var(--dim-text);
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .control-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--dim-text);
+        .sidebar-header {
+            font-weight: bold;
+            border-bottom: 1px dashed var(--term-green);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
         }
 
         select {
+            background: black;
+            color: var(--term-green);
+            border: 1px solid var(--term-green);
+            padding: 8px;
+            font-family: var(--font-stack);
             width: 100%;
-            background: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--dim-text);
-            padding: 0.5rem;
-            font-family: 'Fira Code', monospace;
+            margin-bottom: 1rem;
         }
 
-        .sidebar-bottom {
+        .sidebar-footer {
             margin-top: auto;
-        }
-
-        .btn-small {
-            width: 100%;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            border-color: var(--dim-text);
-        }
-
-        .btn-danger:hover {
-            background: #f00;
-            border-color: #f00;
-            color: #000;
-            box-shadow: 0 0 10px #f00;
-        }
-
-        /* Chat Area */
-        #chat-area {
-            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            background-color: var(--main-bg);
+            gap: 10px;
+        }
+
+        /* 聊天主區域 */
+        #chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             position: relative;
         }
 
         #messages-container {
-            flex-grow: 1;
+            flex: 1;
             overflow-y: auto;
-            padding: 2rem 10%;
+            padding: 2rem;
+            padding-bottom: 150px; /* 預留輸入框空間 */
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
@@ -183,71 +160,99 @@
 
         .message {
             display: flex;
-            flex-direction: column;
-            max-width: 100%;
-            animation: fadeIn 0.3s ease;
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            line-height: 1.6;
         }
 
-        .message-role {
-            font-size: 0.8rem;
-            margin-bottom: 0.3rem;
-            opacity: 0.7;
+        .message.user {
+            justify-content: flex-end;
         }
 
         .message-content {
-            padding: 1rem;
-            border: 1px solid var(--dim-text);
-            line-height: 1.5;
-            white-space: pre-wrap;
+            padding: 10px 15px;
+            border: 1px solid var(--term-dim);
+            background: rgba(0, 59, 0, 0.3);
+            border-radius: 4px;
+            min-width: 50px;
             position: relative;
         }
 
         .message.user .message-content {
-            background-color: var(--user-msg-bg);
-            border-color: var(--text-color);
+            border-color: var(--term-green);
+            background: rgba(0, 255, 65, 0.1);
         }
 
-        .message.assistant .message-content {
-            background-color: var(--ai-msg-bg);
+        .role-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* Input Area */
+        /* 輸入區域 */
         #input-area {
-            padding: 2rem 10%;
-            background-color: var(--main-bg);
-            border-top: 1px solid var(--dim-text);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            background: linear-gradient(transparent, var(--bg-color) 20%);
+            display: flex;
+            justify-content: center;
         }
 
         .input-wrapper {
+            width: 100%;
+            max-width: 800px;
             position: relative;
             display: flex;
-            gap: 1rem;
+            gap: 10px;
         }
 
         textarea {
             width: 100%;
-            background: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            padding: 1rem;
-            font-family: 'Fira Code', monospace;
+            background: #000;
+            border: 1px solid var(--term-green);
+            color: var(--term-green);
+            padding: 15px;
+            border-radius: 5px;
             resize: none;
+            font-family: var(--font-stack);
             height: 60px;
             outline: none;
         }
 
         textarea:focus {
-            box-shadow: 0 0 5px var(--dim-text);
+            box-shadow: 0 0 10px var(--term-dim);
         }
 
-        /* Loading Cursor */
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            height: 15px;
-            background-color: var(--text-color);
+        /* Markdown 樣式修正 */
+        .message-content pre {
+            background: #002200;
+            padding: 10px;
+            border: 1px solid var(--term-dim);
+            overflow-x: auto;
+        }
+        .message-content code {
+            font-family: var(--font-stack);
+            background: #002200;
+            padding: 2px 4px;
+        }
+
+        /* 動畫 */
+        @keyframes pulse {
+            0% { opacity: 1; text-shadow: 0 0 10px var(--term-green); }
+            50% { opacity: 0.8; text-shadow: 0 0 20px var(--term-green); }
+            100% { opacity: 1; text-shadow: 0 0 10px var(--term-green); }
+        }
+
+        .typing-cursor::after {
+            content: '█';
             animation: blink 1s infinite;
-            vertical-align: middle;
         }
 
         @keyframes blink {
@@ -255,263 +260,257 @@
             50% { opacity: 0; }
         }
 
-        @keyframes glitch {
-            0% { text-shadow: 2px 0 red, -2px 0 blue; }
-            25% { text-shadow: -2px 0 red, 2px 0 blue; }
-            50% { text-shadow: 2px 0 red, -2px 0 blue; }
-            75% { text-shadow: -2px 0 red, 2px 0 blue; }
-            100% { text-shadow: 2px 0 red, -2px 0 blue; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            #app-container { flex-direction: column; }
-            #sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--dim-text); padding: 0.5rem; }
-            .sidebar-bottom { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
-            #messages-container, #input-area { padding: 1rem 1rem; }
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <!-- 登入畫面 -->
     <div id="login-screen">
-        <div class="glitch-title">ALPHA PROJECT</div>
-        <p style="margin-bottom: 2rem;">[ SYSTEM ACCESS REQUIRED ]</p>
-        <button id="login-btn">INITIALIZE UPLINK (LOGIN)</button>
+        <h1>ALPHA PROTOCOL</h1>
+        <p style="margin-bottom: 20px;">[ ACCESS RESTRICTED /// AUTH REQUIRED ]</p>
+        <button id="login-btn" class="btn">INITIALIZE LOGIN</button>
     </div>
 
-    <!-- 主程式介面 -->
-    <div id="app-container">
+    <!-- 應用程式畫面 -->
+    <div id="app-screen" class="hidden">
         <!-- 側邊欄 -->
         <div id="sidebar">
-            <div class="brand">ALPHA::NET</div>
+            <div class="sidebar-header">
+                /// SYSTEM CONTROL
+            </div>
             
-            <div class="control-group">
-                <label for="model-select">NEURAL ENGINE:</label>
-                <select id="model-select">
-                    <option value="gpt-5.1">GPT-5.1 (Prototype)</option>
-                    <option value="gpt-5">GPT-5</option>
-                    <option value="gpt-5-nano">GPT-5-Nano</option>
-                    <option value="gpt-5-mini">GPT-5-Mini</option>
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                    <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
-                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                    <option value="deepseek/deepseek-chat">DeepSeek Chat</option>
-                    <option value="deepseek/deepseek-r1">DeepSeek R1</option>
-                </select>
-            </div>
+            <label for="model-select" style="font-size: 0.8rem;">NEURAL LINK:</label>
+            <select id="model-select">
+                <option value="gpt-5.1">GPT-5.1 (Alpha)</option>
+                <option value="gpt-5">GPT-5</option>
+                <option value="gpt-5-nano">GPT-5 Nano</option>
+                <option value="gpt-5-mini">GPT-5 Mini</option>
+                <option value="gpt-4o">GPT-4o (Fallback)</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                <option value="deepseek-chat">DeepSeek Chat</option>
+                <option value="deepseek-r1">DeepSeek R1</option>
+            </select>
 
-            <div class="control-group">
-                <label>STATUS:</label>
-                <div id="user-status" style="color: var(--text-color); font-size: 0.8rem;">[OFFLINE]</div>
-            </div>
+            <div style="flex:1;"></div>
 
-            <div class="sidebar-bottom">
-                <button id="clear-btn" class="btn-small btn-danger">PURGE MEMORY</button>
-                <button id="logout-btn" class="btn-small">TERMINATE (LOGOUT)</button>
+            <div class="sidebar-footer">
+                <div id="user-display" style="font-size: 0.8rem; text-align: center; border: 1px solid var(--term-dim); padding: 5px;">
+                    USER: <span id="username">UNKNOWN</span>
+                </div>
+                <button id="clear-btn" class="btn btn-danger" style="font-size: 0.9rem;">PURGE MEMORY</button>
+                <button id="logout-btn" class="btn" style="font-size: 0.9rem;">TERMINATE SESSION</button>
             </div>
         </div>
 
-        <!-- 聊天區域 -->
+        <!-- 聊天區 -->
         <div id="chat-area">
             <div id="messages-container">
-                <!-- 歡迎訊息 -->
-                <div class="message assistant">
-                    <div class="message-role">SYSTEM</div>
-                    <div class="message-content">ALPHA TERMINAL ONLINE.<br>CONNECTION ESTABLISHED.<br>WAITING FOR INPUT...</div>
+                <!-- 訊息會動態插入這裡 -->
+                <div class="message">
+                    <div class="message-content">
+                        <div class="role-label">SYSTEM</div>
+                        SYSTEM ONLINE. SECURE CONNECTION ESTABLISHED.<br>
+                        SELECT MODEL AND BEGIN TRANSMISSION.
+                    </div>
                 </div>
             </div>
-            
+
             <div id="input-area">
                 <div class="input-wrapper">
-                    <textarea id="user-input" placeholder="Enter command sequence..." onkeydown="handleEnter(event)"></textarea>
-                    <button onclick="sendMessage()">SEND</button>
+                    <textarea id="user-input" placeholder="Enter command..."></textarea>
+                    <button id="send-btn" class="btn">SEND</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 設定與狀態 ---
-        const KV_KEY = 'alpha_chat_history_v1';
+        // 狀態管理
         let chatHistory = [];
-        let isGenerating = false;
+        const KV_KEY = 'alpha_chat_history_v1';
+        
+        // DOM 元素
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app-screen');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const userInput = document.getElementById('user-input');
+        const messagesContainer = document.getElementById('messages-container');
+        const modelSelect = document.getElementById('model-select');
+        const usernameDisplay = document.getElementById('username');
 
-        // --- 初始化 ---
+        // 初始化
         document.addEventListener('DOMContentLoaded', async () => {
-            // 檢查 Puter 是否已登入
             if (puter.auth.isSignedIn()) {
                 await initApp();
             } else {
-                document.getElementById('login-screen').style.display = 'flex';
+                loginScreen.classList.remove('hidden');
             }
         });
 
-        // --- 登入邏輯 ---
-        document.getElementById('login-btn').addEventListener('click', async () => {
+        // 登入功能
+        loginBtn.addEventListener('click', async () => {
             await puter.auth.signIn();
-            // 登入後重整或執行初始化
-            if (puter.auth.isSignedIn()) {
-                await initApp();
-            }
         });
 
-        // --- 登出邏輯 ---
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            await puter.auth.signOut();
+        // 登出功能
+        logoutBtn.addEventListener('click', () => {
+            puter.auth.signOut();
             location.reload();
         });
 
-        // --- 應用程式初始化 ---
-        async function initApp() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-container').style.display = 'flex';
-            
-            const user = await puter.auth.getUser();
-            document.getElementById('user-status').innerText = `USER: ${user.username.toUpperCase()}`;
-
-            // 載入歷史紀錄
-            await loadHistory();
-        }
-
-        // --- KV 儲存管理 ---
-        async function loadHistory() {
-            const stored = await puter.kv.get(KV_KEY);
-            if (stored && Array.isArray(stored)) {
-                chatHistory = stored;
-                // 渲染歷史紀錄
-                const container = document.getElementById('messages-container');
-                // 清空除了歡迎訊息外的內容 (如果需要完全還原，可先清空)
-                container.innerHTML = '';
-                
-                chatHistory.forEach(msg => {
-                    appendMessageToDOM(msg.role, msg.content);
-                });
-                scrollToBottom();
-            }
-        }
-
-        async function saveHistory() {
-            await puter.kv.set(KV_KEY, chatHistory);
-        }
-
-        document.getElementById('clear-btn').addEventListener('click', async () => {
-            if(confirm('WARNING: IRREVERSIBLE ACTION. PURGE ALL MEMORY?')) {
-                await puter.kv.del(KV_KEY);
+        // 清除記憶
+        clearBtn.addEventListener('click', async () => {
+            if(confirm('WARNING: IRREVERSIBLE DATA LOSS. CONFIRM PURGE?')) {
                 chatHistory = [];
-                document.getElementById('messages-container').innerHTML = `
-                    <div class="message assistant">
-                        <div class="message-role">SYSTEM</div>
-                        <div class="message-content">MEMORY PURGED.<br>SYSTEM REBOOTED.</div>
-                    </div>
-                `;
+                await puter.kv.del(KV_KEY);
+                renderChat();
             }
         });
 
-        // --- 聊天核心邏輯 ---
-        function handleEnter(e) {
+        // 發送訊息 (點擊按鈕)
+        sendBtn.addEventListener('click', handleSend);
+
+        // 發送訊息 (Enter 鍵，Shift+Enter 換行)
+        userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                sendMessage();
+                handleSend();
             }
+        });
+
+        // 應用程式初始化邏輯
+        async function initApp() {
+            loginScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            appScreen.style.display = 'flex'; // 強制 flex 顯示
+            
+            const user = await puter.auth.getUser();
+            usernameDisplay.textContent = user.username.toUpperCase();
+
+            // 載入歷史紀錄
+            const storedHistory = await puter.kv.get(KV_KEY);
+            if (storedHistory && Array.isArray(storedHistory)) {
+                chatHistory = storedHistory;
+            }
+            
+            renderChat();
         }
 
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const text = input.value.trim();
-            const model = document.getElementById('model-select').value;
-
-            if (!text || isGenerating) return;
-
-            // 1. UI 顯示使用者訊息
-            input.value = '';
-            appendMessageToDOM('user', text);
+        // 渲染聊天紀錄
+        function renderChat() {
+            messagesContainer.innerHTML = '';
             
-            // 2. 更新歷史紀錄
+            // 系統歡迎訊息
+            if (chatHistory.length === 0) {
+                const sysMsg = document.createElement('div');
+                sysMsg.className = 'message';
+                sysMsg.innerHTML = `
+                    <div class="message-content">
+                        <div class="role-label">SYSTEM</div>
+                        <p>IDENTITY CONFIRMED. KV_STORE MOUNTED.</p>
+                        <p>ACCESSING NEURAL NETWORKS...</p>
+                    </div>`;
+                messagesContainer.appendChild(sysMsg);
+            }
+
+            // 渲染歷史訊息
+            chatHistory.forEach(msg => {
+                appendMessageToUI(msg.role, msg.content, false);
+            });
+            scrollToBottom();
+        }
+
+        // 處理發送邏輯
+        async function handleSend() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // 1. 清空輸入框
+            userInput.value = '';
+
+            // 2. 顯示使用者訊息
+            appendMessageToUI('user', text);
+            
+            // 3. 加入歷史紀錄
             chatHistory.push({ role: 'user', content: text });
             scrollToBottom();
 
-            // 3. 準備 UI 顯示 AI 回應 (Streaming)
-            isGenerating = true;
-            const aiMsgDiv = appendMessageToDOM('assistant', '');
-            const contentDiv = aiMsgDiv.querySelector('.message-content');
-            
-            // 模擬游標
-            const cursor = document.createElement('span');
-            cursor.className = 'cursor';
-            contentDiv.appendChild(cursor);
-
-            let fullResponse = "";
+            // 4. 準備 AI 回覆容器
+            const aiMessageContentDiv = appendMessageToUI('assistant', '', true); // true = isStreaming
+            let fullAiResponse = "";
 
             try {
-                // 4. 呼叫 Puter AI
-                // 注意：若 Puter 後端尚未支援 gpt-5 等特定字串，可能會 fallback 到預設模型或報錯
-                // 我們在此傳送完整的 chatHistory 以保持記憶
-                const response = await puter.ai.chat(chatHistory, { 
-                    model: model, 
+                // 5. 呼叫 Puter AI (Streaming)
+                // 注意：如果模型名稱 Puter 不支援，Puter 可能會 fallback 或報錯
+                // 我們在此將 deepseek 路徑修正為 Puter 支援的格式，如果使用者選的是 deepseek/xxx
+                let selectedModel = modelSelect.value;
+                if(selectedModel === 'deepseek-chat' || selectedModel === 'deepseek-r1') {
+                    // Puter 支援 deepseek-chat, deepseek-coder 等，可能需要加上 deepseek/ 前綴
+                    // 根據目前 Puter API 實作，嘗試直接傳遞，或加上前綴
+                    selectedModel = `deepseek/${selectedModel}`;
+                }
+
+                const responseStream = await puter.ai.chat(chatHistory, { 
+                    model: selectedModel, 
                     stream: true 
                 });
 
-                for await (const part of response) {
-                    // 移除游標
-                    if (contentDiv.contains(cursor)) contentDiv.removeChild(cursor);
+                for await (const part of responseStream) {
+                    // Puter.js v2 chat stream returns an object with a text property or content
+                    const textChunk = part?.text || part?.content || ""; 
+                    fullAiResponse += textChunk;
                     
-                    const chunk = part?.text || "";
-                    fullResponse += chunk;
+                    // 即時渲染 Markdown (為了效能，可以不需要每次 chunk 都 render markdown，但在這邊為了視覺效果我們做簡單處理)
+                    // 簡單處理：更新 raw text，最後再 render markdown
+                    aiMessageContentDiv.innerHTML = `<div class="role-label">AI /// ${modelSelect.value}</div>` + marked.parse(fullAiResponse);
                     
-                    // 防止 HTML injection，簡單處理
-                    contentDiv.innerText = fullResponse;
-                    
-                    // 加回游標
-                    contentDiv.appendChild(cursor);
                     scrollToBottom();
                 }
 
+                // 6. 完成後儲存
+                chatHistory.push({ role: 'assistant', content: fullAiResponse });
+                await puter.kv.set(KV_KEY, chatHistory);
+
             } catch (error) {
-                console.error("Neural Link Error:", error);
-                if (contentDiv.contains(cursor)) contentDiv.removeChild(cursor);
-                contentDiv.innerText += `\n[ERROR: CONNECTION FAILED - ${error.message || 'UNKNOWN'}]`;
-                fullResponse += `\n[System Error]`;
-            } finally {
-                // 結束串流
-                if (contentDiv.contains(cursor)) contentDiv.removeChild(cursor);
-                isGenerating = false;
-                
-                // 5. 儲存 AI 回應到歷史紀錄
-                chatHistory.push({ role: 'assistant', content: fullResponse });
-                await saveHistory();
+                console.error(error);
+                aiMessageContentDiv.innerHTML += `<br><span style="color:var(--alert)">[ERROR: CONNECTION SEVERED - ${error.message}]</span>`;
+                // 嘗試將錯誤也記錄，避免下次載入卡住
+                // chatHistory.push({ role: 'assistant', content: "Error generating response." });
             }
         }
 
-        // --- 輔助函式 ---
-        function appendMessageToDOM(role, text) {
-            const container = document.getElementById('messages-container');
+        // 將訊息加入 UI
+        function appendMessageToUI(role, content, isStreaming = false) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
             
-            const roleDiv = document.createElement('div');
-            roleDiv.className = 'message-role';
-            roleDiv.innerText = role === 'user' ? 'OPERATOR' : 'ALPHA_AI';
-            
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
-            contentDiv.innerText = text; // 這裡用 innerText 防止 XSS，若需 markdown 需引入 parser
+            if (isStreaming) contentDiv.classList.add('typing-cursor');
 
-            msgDiv.appendChild(roleDiv);
+            const label = role === 'user' ? 'OPERATOR' : `AI /// ${modelSelect.value}`;
+            
+            // 如果不是 streaming 狀態，直接 render markdown
+            if (!isStreaming) {
+                contentDiv.innerHTML = `<div class="role-label">${label}</div>` + marked.parse(content);
+            } else {
+                contentDiv.innerHTML = `<div class="role-label">${label}</div>`;
+            }
+
             msgDiv.appendChild(contentDiv);
-            container.appendChild(msgDiv);
-            return msgDiv;
+            messagesContainer.appendChild(msgDiv);
+            
+            return contentDiv; // 回傳 content div 以便 streaming 更新
         }
 
         function scrollToBottom() {
-            const container = document.getElementById('messages-container');
-            container.scrollTop = container.scrollHeight;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
     </script>
