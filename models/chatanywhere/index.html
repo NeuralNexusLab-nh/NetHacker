@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatAnywhere AI Playground</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <style>
+    body {
+      background-color: #000;
+      color: #00ff88;
+      font-family: "Courier New", monospace;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #00ff66;
+      text-shadow: 0 0 15px #00ff66;
+      letter-spacing: 2px;
+    }
+    #terminal {
+      width: 100%;
+      height: 70vh;
+      background: rgba(0, 25, 0, 0.9);
+      border: 2px solid #00ff88;
+      border-radius: 6px;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 0 0 20px #00ff66;
+    }
+    .msg { margin: 10px 0; white-space: pre-wrap; }
+    .user { color: #00ccff; }
+    .ai { color: #00ff88; }
+    #inputArea { display: flex; margin-top: 20px; gap: 10px; }
+    #input {
+      flex: 1; background: #000; color: #0f0;
+      border: none; border-bottom: 2px solid #00ff88;
+      padding: 10px; font-family: inherit; font-size: 16px;
+      outline: none;
+    }
+    #sendBtn, #deleteBtn {
+      border: none; padding: 10px 20px;
+      font-weight: bold; color: #000;
+      border-radius: 4px; cursor: pointer;
+    }
+    #sendBtn { background: #00ff88; }
+    #sendBtn:hover { background: #00cc66; }
+    #deleteBtn { background: #ff4444; }
+    .cursor {
+      display: inline-block; width: 8px;
+      height: 1em; background: #00ff88;
+      animation: blink 1s steps(2, start) infinite;
+      vertical-align: bottom; margin-left: 3px;
+    }
+    @keyframes blink { to { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <h1>⚡ ChatAnywhere AI Playground</h1>
+
+  <!-- 模型選擇 -->
+  <div style="text-align:center; margin-bottom:10px;">
+    <select id="modelSelect">
+      <option value="gpt-4.1-mini">GPT-4.1-mini</option>
+      <option value="gpt-4.1-nano">GPT-4.1-nano</option>
+      <option value="gpt-5-mini">GPT-5-mini</option>
+      <option value="gpt-5-nano">GPT-5-nano</option>
+      <option value="gpt-4o-mini">GPT-4o-mini</option>
+    </select>
+  </div>
+
+  <div id="terminal"></div>
+
+  <div id="inputArea">
+    <input id="input" type="text" placeholder="> type your message..." autofocus>
+    <button id="sendBtn">SEND</button>
+    <button id="deleteBtn">DELETE</button>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const modelSelect = document.getElementById('modelSelect');
+
+    // 讀本地記憶
+    let chatHistory = JSON.parse(localStorage.getItem("ChatAnywhere-history")) || [];
+
+    function printMessage(text, cls) {
+      const msg = document.createElement('div');
+      msg.classList.add('msg', cls);
+      msg.innerHTML = marked.parse(text);
+      terminal.appendChild(msg);
+      terminal.scrollTop = terminal.scrollHeight;
+      return msg;
+    }
+
+    // 載入歷史消息
+    printMessage("System Booted...\nPowered By ChatAnywhere API", "ai");
+    chatHistory.forEach(msg => printMessage(msg.text, msg.role));
+
+    // 保存記憶（本地）
+    function saveChat(role, text) {
+      chatHistory.push({ role, text });
+      localStorage.setItem("ChatAnywhere-history", JSON.stringify(chatHistory));
+    }
+
+    // API Key 隱藏法（拆成 5 段）
+    const keyParts = [
+      "sk-qHB3z",
+      "u2dSrGB",
+      "ApqFidw",
+      "f3Xbk1t",
+      "nhOI7MrH"
+    ];
+    function getApiKey() {
+      return keyParts.join("") + "eAGfkX9RprepB5";
+    }
+
+    // 送出請求
+    async function sendMessage() {
+      const userInput = input.value.trim();
+      if (!userInput) return;
+
+      printMessage("> " + userInput, 'user');
+      saveChat("user", userInput);
+
+      input.value = "";
+      const aiMsg = printMessage("AI thinking...", "ai");
+
+      try {
+        // 建 messages 陣列加入記憶
+        const messages = chatHistory.map(m => ({
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.text
+        }));
+        messages.push({ role: 'user', content: userInput });
+
+        const response = await fetch("https://api.chatanywhere.tech/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${getApiKey()}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: modelSelect.value,
+            messages: messages
+          })
+        });
+        const data = await response.json();
+
+        const aiText = data?.choices?.[0]?.message?.content || "[No response]";
+        aiMsg.innerHTML = marked.parse(aiText);
+        saveChat("ai", aiText);
+
+      } catch (err) {
+        aiMsg.textContent = "❌ Error: " + err.message;
+      }
+    }
+
+    deleteBtn.addEventListener("click", () => {
+      localStorage.removeItem("ChatAnywhere-history");
+      chatHistory = [];
+      terminal.innerHTML = "";
+      printMessage("System Booted...\nPowered By ChatAnywhere API", "ai");
+    });
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
